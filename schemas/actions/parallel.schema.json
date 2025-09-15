@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.org/schemas/actions/parallel.schema.json",
+  "title": "Action: Parallel",
+  "description": "Схема для дії, що виконує блоки дій паралельно.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "паралельно" },
+    "invoke": { "const": "flow:parallel" },
+    "payload": {
+      "type": "object",
+      "description": "Об'єкт, де кожен ключ - назва гілки, а значення - масив дій.",
+      "additionalProperties": { "$ref": "https://mova.org/schemas/envelope.3.3.schema.json#/properties/actions" }
+    }
+  },
+  "required": ["type", "invoke", "payload"]
+}

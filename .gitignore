@@ -2,7 +2,7 @@
 /node_modules
 
 # Generated canonical files
-/canonical
+
 
 # IDE and OS files
 .vscode/

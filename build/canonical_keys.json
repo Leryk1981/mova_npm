@@ -1,0 +1,16 @@
+[
+  "actions",
+  "count",
+  "delay_ms",
+  "description",
+  "dlq",
+  "invoke",
+  "mova_version",
+  "plan_ref",
+  "queue",
+  "retry",
+  "route_version",
+  "timeout_ms",
+  "trigger",
+  "type"
+]

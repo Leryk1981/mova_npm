@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.org/schemas/actions/set.schema.json",
+  "title": "Action: Set Variable",
+  "description": "Схема для дії, що встановлює значення змінної в контексті.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "встановити_змінну" },
+    "invoke": { "const": "context:set" },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "variable": { "type": "string" },
+        "value": {}
+      },
+      "required": ["variable", "value"]
+    }
+  },
+  "required": ["type", "invoke", "payload"]
+}

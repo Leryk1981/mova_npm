@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.org/schemas/actions/invoke.schema.json",
+  "title": "Action: Invoke Plan",
+  "description": "Схема для дії, що викликає інший план.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "викликати_план" },
+    "invoke": { "const": "flow:invoke" },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "plan_ref": { "type": "string" },
+        "parameters": { "type": "object" },
+        "result_in": { "type": "string" }
+      },
+      "required": ["plan_ref"]
+    }
+  },
+  "required": ["type", "invoke", "payload"]
+}

@@ -1,0 +1,5 @@
+{
+  "plan_min": "canonical\\plan_min.json",
+  "route_min_http_plan_ref": "canonical\\route_min_http_plan_ref.json",
+  "sub_plan": "canonical\\sub_plan.json"
+}

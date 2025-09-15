@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.org/schemas/envelope.3.3.schema.json",
+  "title": "MOVA Envelope",
+  "description": "Канонічна схема для 'конверта' або 'плану' MOVA.",
+  "type": "object",
+  "properties": {
+    "mova_version": {
+      "description": "Версія формату плану",
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "parameters": {
+      "description": "Схема для вхідних параметрів плану (використовується для валідації вхідних даних).",
+      "type": "object"
+    },
+    "actions": {
+      "description": "Список дій, які потрібно виконати",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/action" }
+    }
+  },
+  "required": ["mova_version", "actions"],
+  "$defs": {
+    "action": {
+      "description": "Будь-яка валідна дія MOVA",
+      "type": "object",
+      "discriminator": { "propertyName": "type" },
+      "properties": {
+        "on_error": { "$ref": "#/properties/actions" },
+        "for_each": { "type": "string" },
+        "loop_variable": { "type": "string", "default": "item" },
+        "if": { "type": "string" },
+        "on_success": { "$ref": "#/properties/actions" }
+      },
+      "oneOf": [
+        { "$ref": "actions/log.schema.json" },
+        { "$ref": "actions/set.schema.json" },
+        { "$ref": "actions/http.schema.json" },
+        { "$ref": "actions/return.schema.json" },
+        { "$ref": "actions/invoke.schema.json" },
+        { "$ref": "actions/switch.schema.json" },
+        { "$ref": "actions/parallel.schema.json" },
+        { "$ref": "actions/try.schema.json" }
+      ]
+    }
+  }
+}

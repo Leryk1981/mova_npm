@@ -6,8 +6,14 @@
   "scripts": {
     "translate": "node scripts/uk_to_en.mjs templates/ua",
     "validate": "node scripts/validate.mjs",
-    "build": "npm run translate && npm run validate",
-    "run:plan": "node scripts/run.mjs canonical/plan_min.json"
+    "build": "npm run build:keys && npm run build:ua && npm run build:manifest && npm run check:lexicon",
+    "run": "node scripts/run.mjs",
+    "run:plan": "npm run build:ua && npm run build:manifest && npm run run -- canonical/plan_min.json",
+    "build:manifest": "node scripts/build_manifest.mjs > canonical/manifest.json",
+    "build:keys": "node scripts/extract_keys.mjs > build/canonical_keys.json",
+    "lint:templates": "node scripts/templates_lint.mjs templates/ua",
+    "check:lexicon": "npm run build:keys && node scripts/lexicon_coverage.mjs",
+    "build:ua": "npm run lint:templates && npm run translate && npm run validate"
   },
   "author": "",
   "license": "MIT",

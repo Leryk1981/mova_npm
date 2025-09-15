@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.org/schemas/actions/return.schema.json",
+  "title": "Action: Return",
+  "description": "Схема для дії, що завершує виконання плану і повертає значення.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "повернути_значення" },
+    "invoke": { "const": "flow:return" },
+    "payload": {
+      "description": "Значення, яке буде повернуто з плану."
+    }
+  },
+  "required": ["type", "invoke", "payload"]
+}

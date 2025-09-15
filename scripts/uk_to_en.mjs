@@ -24,17 +24,20 @@ if (!existsSync(inputDirFullPath)) {
 const lexiconPath = resolve(projectRoot, 'lexicon_uk.json');
 const lexicon = JSON.parse(readFileSync(lexiconPath, 'utf-8'));
 
+const allowlist = new Set(JSON.parse(readFileSync(resolve(projectRoot, 'allowlist_structural.json'), 'utf-8')));
+
 // 3. Рекурсивна функція для трансляції ключів
 function translateKeys(obj) {
   if (Array.isArray(obj)) {
     return obj.map(item => translateKeys(item));
   }
   if (obj !== null && typeof obj === 'object') {
-    return Object.keys(obj).reduce((acc, key) => {
-      const translatedKey = lexicon[key] || key;
-      acc[translatedKey] = translateKeys(obj[key]);
-      return acc;
-    }, {});
+    const newObj = {};
+    for (const key in obj) {
+      const translatedKey = allowlist.has(key) ? (lexicon[key] || key) : key;
+      newObj[translatedKey] = translateKeys(obj[key]);
+    }
+    return newObj;
   }
   return obj;
 }

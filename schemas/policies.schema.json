@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.org/schemas/policies.schema.json",
+  "title": "MOVA Policies",
+  "description": "Канонічна схема для 'політик' MOVA.",
+  "type": "object",
+  "properties": {
+    "timeout_ms": {
+      "type": "integer"
+    },
+    "retry": {
+      "type": "object",
+      "properties": {
+        "count": { "type": "integer" },
+        "delay_ms": { "type": "integer" }
+      }
+    },
+    "dlq": {
+      "type": "object",
+      "properties": { "queue": { "type": "string" } }
+    }
+  }
+}

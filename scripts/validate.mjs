@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, existsSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 // Import the specific constructor for JSON Schema 2020-12
@@ -10,12 +10,56 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, '..');
 
-// Initialize Ajv using the 2020-12 constructor
-const ajv = new Ajv2020({ allErrors: true });
-// WORKAROUND: The Ajv instance is failing to find its own meta-schema.
-// We disable schema validation to bypass this internal check, as we trust our own schemas.
-// This allows Ajv to proceed with validating the data against the schemas.
-ajv.opts.validateSchema = false;
+// --- Рекурсивний пошук файлів схем ---
+function findJsonFiles(dir) {
+  let results = [];
+  if (!existsSync(dir)) return results;
+
+  const list = readdirSync(dir, { withFileTypes: true });
+  for (const file of list) {
+    const fullPath = resolve(dir, file.name);
+    if (file.isDirectory()) {
+      results = results.concat(findJsonFiles(fullPath));
+    } else if (file.name.endsWith('.json')) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+// --- Попереднє завантаження та компіляція всіх схем ---
+const schemaDir = resolve(projectRoot, 'schemas');
+const schemaFilePaths = findJsonFiles(schemaDir);
+const allSchemas = [];
+
+for (const schemaPath of schemaFilePaths) {
+  const fileContent = readFileSync(schemaPath, 'utf-8');
+
+  if (fileContent.trim() === '') {
+    console.warn(`⚠️  Попередження: Файл порожній, ігнорується: ${schemaPath}`);
+    continue;
+  }
+
+  try {
+    const schema = JSON.parse(fileContent);
+    // Обробляємо файл, тільки якщо він оголошує себе як JSON Schema
+    if (schema.$schema) {
+      if (!schema.$id) {
+        console.error(`❌ Помилка: Файл схеми "${schemaPath}" не має обов'язкового поля "$id".`);
+        process.exit(1);
+      }
+      allSchemas.push(schema);
+    }
+  } catch (e) {
+    console.error(`❌ Помилка парсингу JSON у файлі: ${schemaPath}`);
+    throw e; // Повторно кидаємо помилку, щоб побачити повний контекст
+  }
+}
+
+// Спочатку створюємо екземпляр Ajv. Він має автоматично завантажити мета-схему 2020-12.
+const ajv = new Ajv2020({ allErrors: true, validateSchema: false, discriminator: true });
+// Потім додаємо всі наші схеми. Це також їх скомпілює.
+ajv.addSchema(allSchemas);
 
 addFormats(ajv);
 
@@ -32,7 +76,11 @@ function validateFile(dataPath, schemaPath) {
     const schema = JSON.parse(readFileSync(schemaFullPath, 'utf-8'));
     const data = JSON.parse(readFileSync(dataFullPath, 'utf-8'));
 
-    const validate = ajv.compile(schema);
+    // Отримуємо вже скомпільований валідатор за його унікальним $id
+    const validate = ajv.getSchema(schema.$id);
+    if (!validate) {
+      throw new Error(`Не вдалося знайти попередньо скомпільовану схему з $id: ${schema.$id}`);
+    }
     const valid = validate(data);
 
     if (valid) {
@@ -62,12 +110,14 @@ try {
   }
 
   for (const fileName of canonicalFiles) {
+    if (fileName === 'manifest.json') continue; // Ignore the manifest file
+
     let schemaName;
     // Проста логіка для визначення схеми за назвою файлу
-    if (fileName.startsWith('plan')) {
-      schemaName = 'plan.schema.json';
-    } else if (fileName.startsWith('route')) {
-      schemaName = 'route.schema.json';
+    if (fileName.includes('route')) {
+      schemaName = 'route.1.0.schema.json';
+    } else if (fileName.includes('plan')) {
+      schemaName = 'envelope.3.3.schema.json';
     }
 
     if (schemaName) {

@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.org/schemas/actions/log.schema.json",
+  "title": "Action: Log",
+  "description": "Схема для дії, що виводить повідомлення в консоль.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "друк_повідомлення" },
+    "invoke": { "const": "console:log" },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "message": { "type": "string" }
+      },
+      "required": ["message"]
+    }
+  },
+  "required": ["type", "invoke", "payload"]
+}
