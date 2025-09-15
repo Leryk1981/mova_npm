@@ -2,56 +2,24 @@
   "mova_version": "3.3",
   "actions": [
     {
-      "type": "паралельно",
-      "description": "Виконати два HTTP-запити паралельно",
-      "invoke": "flow:parallel",
-      "payload": {
-        "отримати_користувача": [
-          {
-            "type": "http_запит",
-            "invoke": "http:request",
-            "payload": {
-              "url": "https://jsonplaceholder.typicode.com/users/1",
-              "method": "GET",
-              "result_in": "userResponse"
-            }
-          }
-        ],
-        "отримати_пости": [
-          {
-            "type": "http_запит",
-            "invoke": "http:request",
-            "payload": {
-              "url": "https://jsonplaceholder.typicode.com/posts?userId=1",
-              "method": "GET",
-              "result_in": "postsResponse"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "type": "встановити_змінну",
-      "invoke": "context:set",
-      "payload": {
-        "variable": "user",
-        "value": "{userResponse.body}"
-      }
-    },
-    {
-      "type": "встановити_змінну",
-      "invoke": "context:set",
-      "payload": {
-        "variable": "posts",
-        "value": "{postsResponse.body}"
-      }
-    },
-    {
-      "type": "друк_повідомлення",
-      "description": "Вивести фінальний результат після завершення паралельних задач",
+      "type": "log",
       "invoke": "console:log",
       "payload": {
-        "message": "Користувач {user.name} має {posts.length} постів."
+        "message": "Починаємо..."
+      }
+    },
+    {
+      "type": "delay",
+      "invoke": "flow:delay",
+      "payload": {
+        "ms": 2000
+      }
+    },
+    {
+      "type": "log",
+      "invoke": "console:log",
+      "payload": {
+        "message": "Завершено після 2-секундної затримки."
       }
     }
   ]

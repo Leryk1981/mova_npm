@@ -23,8 +23,7 @@
 ## Швидкий старт
 ```bash
 npm i
-npm run ua:envelope
-npm run ua:route
+npm run build:ua
 # далі провалідуйте канонічні файли вашим валідатором MOVA
 ```
 

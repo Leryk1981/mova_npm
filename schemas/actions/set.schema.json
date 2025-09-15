@@ -5,7 +5,7 @@
   "description": "Схема для дії, що встановлює значення змінної в контексті.",
   "type": "object",
   "properties": {
-    "type": { "const": "встановити_змінну" },
+    "type": { "const": "set" },
     "invoke": { "const": "context:set" },
     "payload": {
       "type": "object",

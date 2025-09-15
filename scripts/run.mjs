@@ -129,6 +129,13 @@ async function runPlan(planPath, initialParams = {}) {
         }
         return true;
       },
+      'flow:delay': async (payload) => {
+        const ms = payload.ms || 0;
+        console.log(`[ENGINE] Delaying for ${ms}ms...`);
+        await new Promise(resolve => setTimeout(resolve, ms));
+        console.log(`[ENGINE] Delay finished.`);
+        return true;
+      },
       'flow:invoke': async (payload) => {
         const { plan_ref, parameters, result_in } = payload;
         if (!plan_ref) {

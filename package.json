@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "translate": "node scripts/uk_to_en.mjs templates/ua",
+    "translate:en-ua": "node scripts/en_to_uk.mjs",
     "validate": "node scripts/validate.mjs",
     "build": "npm run build:keys && npm run build:ua && npm run build:manifest && npm run check:lexicon",
     "run": "node scripts/run.mjs",
@@ -13,7 +14,8 @@
     "build:keys": "node scripts/extract_keys.mjs > build/canonical_keys.json",
     "lint:templates": "node scripts/templates_lint.mjs templates/ua",
     "check:lexicon": "npm run build:keys && node scripts/lexicon_coverage.mjs",
-    "build:ua": "npm run lint:templates && npm run translate && npm run validate"
+    "build:ua": "npm run lint:templates && npm run translate && npm run validate",
+    "build:uk-schema": "node scripts/build_uk_schema.mjs"
   },
   "author": "",
   "license": "MIT",

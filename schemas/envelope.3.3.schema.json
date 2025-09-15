@@ -44,7 +44,8 @@
         { "$ref": "actions/invoke.schema.json" },
         { "$ref": "actions/switch.schema.json" },
         { "$ref": "actions/parallel.schema.json" },
-        { "$ref": "actions/try.schema.json" }
+        { "$ref": "actions/try.schema.json" },
+        { "$ref": "actions/delay.schema.json" }
       ]
     }
   }

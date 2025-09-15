@@ -1,0 +1,13 @@
+{
+  "mova_version": "3.3",
+  "description": "Тестовий план з дією затримки",
+  "actions": [
+    {
+      "type": "delay",
+      "invoke": "flow:delay",
+      "payload": {
+        "ms": 1000
+      }
+    }
+  ]
+}

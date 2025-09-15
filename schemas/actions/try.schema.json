@@ -5,7 +5,7 @@
   "description": "Схема для дії, що забезпечує обробку помилок та очищення.",
   "type": "object",
   "properties": {
-    "type": { "const": "спробувати" },
+    "type": { "const": "try" },
     "invoke": { "const": "flow:try" },
     "payload": {
       "type": "object",

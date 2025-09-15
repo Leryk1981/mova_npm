@@ -5,7 +5,7 @@
   "description": "Схема для дії, що виконує HTTP-запит.",
   "type": "object",
   "properties": {
-    "type": { "const": "http_запит" },
+    "type": { "const": "http_request" },
     "invoke": { "const": "http:request" },
     "payload": {
       "type": "object",

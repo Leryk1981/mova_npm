@@ -5,7 +5,7 @@
   "description": "Схема для дії, що викликає інший план.",
   "type": "object",
   "properties": {
-    "type": { "const": "викликати_план" },
+    "type": { "const": "invoke" },
     "invoke": { "const": "flow:invoke" },
     "payload": {
       "type": "object",

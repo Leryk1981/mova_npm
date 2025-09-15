@@ -27,15 +27,22 @@ const lexicon = JSON.parse(readFileSync(lexiconPath, 'utf-8'));
 const allowlist = new Set(JSON.parse(readFileSync(resolve(projectRoot, 'allowlist_structural.json'), 'utf-8')));
 
 // 3. Рекурсивна функція для трансляції ключів
-function translateKeys(obj) {
+function translateObject(obj) {
   if (Array.isArray(obj)) {
-    return obj.map(item => translateKeys(item));
+    return obj.map(item => translateObject(item));
   }
   if (obj !== null && typeof obj === 'object') {
     const newObj = {};
     for (const key in obj) {
       const translatedKey = allowlist.has(key) ? (lexicon[key] || key) : key;
-      newObj[translatedKey] = translateKeys(obj[key]);
+      let value = translateObject(obj[key]);
+
+      // Якщо ключ - 'type', перекладаємо і його значення
+      if (translatedKey === 'type' && typeof value === 'string') {
+        value = lexicon[value] || value;
+      }
+
+      newObj[translatedKey] = value;
     }
     return newObj;
   }
@@ -66,8 +73,12 @@ jsonFiles.forEach(fileName => {
 
   try {
     const ukJsonContent = readFileSync(inputFullPath, 'utf-8');
+    if (ukJsonContent.trim() === '') {
+      console.warn(`⚠️  Файл ${inputFileRelativePath} порожній і буде проігнорований.`);
+      return; // Пропускаємо ітерацію для порожнього файлу
+    }
     const ukJson = JSON.parse(ukJsonContent);
-    const enJson = translateKeys(ukJson);
+    const enJson = translateObject(ukJson);
 
     const outputFilename = basename(inputFileRelativePath)
       .replace('план_укр', 'plan')

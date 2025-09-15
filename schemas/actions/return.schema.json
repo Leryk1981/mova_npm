@@ -5,7 +5,7 @@
   "description": "Схема для дії, що завершує виконання плану і повертає значення.",
   "type": "object",
   "properties": {
-    "type": { "const": "повернути_значення" },
+    "type": { "const": "return" },
     "invoke": { "const": "flow:return" },
     "payload": {
       "description": "Значення, яке буде повернуто з плану."

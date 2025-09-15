@@ -5,7 +5,7 @@
   "description": "Схема для дії, що виконує блоки дій паралельно.",
   "type": "object",
   "properties": {
-    "type": { "const": "паралельно" },
+    "type": { "const": "parallel" },
     "invoke": { "const": "flow:parallel" },
     "payload": {
       "type": "object",

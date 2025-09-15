@@ -5,7 +5,7 @@
   "description": "Схема для дії, що виконує блок дій на основі значення.",
   "type": "object",
   "properties": {
-    "type": { "const": "перемикач" },
+    "type": { "const": "switch" },
     "invoke": { "const": "flow:switch" },
     "payload": {
       "type": "object",

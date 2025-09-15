@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.org/schemas/actions/delay.schema.json",
+  "title": "Action: Delay",
+  "description": "Схема для дії, що створює затримку у виконанні плану.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "delay" },
+    "invoke": { "const": "flow:delay" },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "ms": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["ms"]
+    }
+  },
+  "required": ["type", "invoke", "payload"]
+}

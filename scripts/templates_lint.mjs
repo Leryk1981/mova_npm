@@ -45,8 +45,20 @@ function checkKeys(obj, filePath) {
 console.log(`--- Лінтер шаблонів у ${inputDirRelativePath} ---`);
 files.forEach(fileName => {
   const filePath = join(inputDirRelativePath, fileName);
-  const content = JSON.parse(readFileSync(resolve(root, filePath), 'utf-8'));
-  checkKeys(content, filePath);
+  const fileContent = readFileSync(resolve(root, filePath), 'utf-8');
+
+  if (fileContent.trim() === '') {
+    console.warn(`⚠️  Файл ${filePath} порожній і буде проігнорований.`);
+    return;
+  }
+
+  try {
+    const content = JSON.parse(fileContent);
+    checkKeys(content, filePath);
+  } catch (e) {
+    console.error(`❌ Помилка парсингу JSON у файлі ${filePath}: ${e.message}`);
+    hasErrors = true;
+  }
 });
 
 if (hasErrors) process.exit(1);
