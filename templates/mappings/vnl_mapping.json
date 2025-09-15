@@ -1,0 +1,28 @@
+ {
+  "send message": {
+    "action": {
+      "тип": "виклик_інструменту",
+      "назва": "messaging.send"
+    },
+    "params_mapping": {
+      "to": "аргументи.channel",
+      "with": "аргументи.text"
+    }
+  },
+  "fetch file": {
+    "action": {
+      "тип": "прочитати_файл"
+    },
+    "params_mapping": {
+      "from": "шлях"
+    }
+  },
+  "log message": {
+    "action": {
+      "тип": "друк_повідомлення"
+    },
+    "params_mapping": {
+      "with": "повідомлення"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+ {
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.dev/schemas/core/manifest.json",
+  "title": "MOVA Manifest",
+  "description": "Схема для маніфесту проєкту MOVA.",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "version": { "type": "string" }
+  },
+  "required": ["name", "version"]
+}

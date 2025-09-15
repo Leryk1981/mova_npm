@@ -1,4 +1,4 @@
-{
+ {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/actions/file_read.schema.json",
   "title": "Action: file_read",
@@ -7,11 +7,9 @@
   "properties": {
     "type": { "const": "file_read" },
     "name": { "type": "string" },
-    "path": { "type": "string", "minLength": 1 },
-    "encoding": { "type": "string", "enum": ["utf8","base64"] },
+    "path": { "type": "string" },
     "save_as": { "type": "string" },
-    "policies": { "$ref": "../policies.schema.json" }
+    "policies": { "$ref": "https://mova.dev/schemas/definitions/policies.schema.json" }
   },
   "additionalProperties": false
 }
-

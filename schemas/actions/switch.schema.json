@@ -13,9 +13,9 @@
         "value": {},
         "cases": {
           "type": "object",
-          "additionalProperties": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
+          "additionalProperties": { "$ref": "https://mova.dev/schemas/core/envelope.3.3.schema.json#/properties/actions" }
         },
-        "default": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
+        "default": { "$ref": "https://mova.dev/schemas/core/envelope.3.3.schema.json#/properties/actions" }
       },
       "required": ["value", "cases"]
     }

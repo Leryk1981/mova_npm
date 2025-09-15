@@ -10,7 +10,7 @@
     "name": { "type": "string" },
     "message": { "oneOf": [ { "type": "string" }, { "type": "object" }, { "type": "array" } ] },
     "save_as": { "type": "string" },
-    "policies": { "$ref": "../policies.schema.json" }
+    "policies": { "$ref": "https://mova.dev/schemas/definitions/policies.schema.json" }
   },
   "additionalProperties": false
 }

@@ -1,9 +1,0 @@
-{
-  "mova_version": "3.3",
-  "actions": [
-    {
-      "type": "log",
-      "message": "ok"
-    }
-  ]
-}

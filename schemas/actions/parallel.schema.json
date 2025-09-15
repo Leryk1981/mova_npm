@@ -10,7 +10,7 @@
     "payload": {
       "type": "object",
       "description": "Об'єкт, де кожен ключ - назва гілки, а значення - масив дій.",
-      "additionalProperties": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
+      "additionalProperties": { "$ref": "https://mova.dev/schemas/core/envelope.3.3.schema.json#/properties/actions" }
     }
   },
   "required": ["type", "invoke", "payload"]

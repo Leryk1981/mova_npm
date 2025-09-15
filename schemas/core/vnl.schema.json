@@ -1,0 +1,13 @@
+ {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mova.dev/schemas/definitions/vnl.schema.json",
+  "title": "VNL AST",
+  "description": "Схема для абстрактного синтаксичного дерева (AST) мови VNL.",
+  "type": "object",
+  "properties": {
+    "verb": { "type": "string" },
+    "noun": { "type": "string" },
+    "params": { "type": "object" }
+  },
+  "required": ["verb", "noun"]
+}

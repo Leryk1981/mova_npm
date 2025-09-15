@@ -1,9 +1,19 @@
 # Dependencies
 /node_modules
 
-# Generated canonical files
-
+# Build artifacts
+/build/
 
 # IDE and OS files
 .vscode/
 *.DS_Store
+
+# Generated files
+/canonical/
+/schemas/dist/
+/templates/ua/from-en/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

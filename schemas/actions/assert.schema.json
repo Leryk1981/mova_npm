@@ -10,8 +10,7 @@
     "expr": { "type": "string" },
     "message": { "type": "string" },
     "save_as": { "type": "string" },
-    "policies": { "$ref": "../policies.schema.json" }
+    "policies": { "$ref": "https://mova.dev/schemas/definitions/policies.schema.json" }
   },
   "additionalProperties": false
 }
-

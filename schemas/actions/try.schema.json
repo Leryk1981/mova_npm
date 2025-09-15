@@ -10,15 +10,15 @@
     "payload": {
       "type": "object",
       "properties": {
-        "try": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" },
+        "try": { "$ref": "https://mova.dev/schemas/core/envelope.3.3.schema.json#/properties/actions" },
         "catch": {
           "type": "object",
           "properties": {
             "as": { "type": "string", "default": "error" },
-            "actions": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
+            "actions": { "$ref": "https://mova.dev/schemas/core/envelope.3.3.schema.json#/properties/actions" }
           }
         },
-        "finally": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
+        "finally": { "$ref": "https://mova.dev/schemas/core/envelope.3.3.schema.json#/properties/actions" }
       },
       "required": ["try"]
     }
