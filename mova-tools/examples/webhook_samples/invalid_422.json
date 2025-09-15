@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "details": [
+      {
+        "message": "must be one of the allowed values"
+      }
+    ]
+  }
+}

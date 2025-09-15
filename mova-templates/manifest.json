@@ -1,0 +1,28 @@
+{
+  "name": "mova-templates",
+  "mova_version": "3.3.x",
+  "route_version": "1.0",
+  "timezone": "Europe/Berlin",
+  "allowed_actions": [
+    "http_fetch",
+    "set",
+    "assert",
+    "emit_event",
+    "log",
+    "sleep"
+  ],
+  "canonical_keys": {
+    "http_fetch": [
+      "endpoint",
+      "method",
+      "payload",
+      "headers",
+      "timeout_ms"
+    ]
+  },
+  "placeholders": [
+    "${env.*}",
+    "${vars.*}",
+    "${$fn()}"
+  ]
+}

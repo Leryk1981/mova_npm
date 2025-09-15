@@ -1,0 +1,102 @@
+{
+  "version": "1",
+  "generated_at": "2025-09-12T16:48:47.050Z",
+  "entries": [
+    {
+      "file": "actions\\assert.schema.json",
+      "sha256": "8b26ee4777cf5356f8d2207f2ccc41bad4b756bcdb55445de95564eb41678bb5"
+    },
+    {
+      "file": "actions\\base64.schema.json",
+      "sha256": "2f778060b914cf61feb9b1cf729351f27fea5d96bdb66c0c49f17b01379331fc"
+    },
+    {
+      "file": "actions\\call.schema.json",
+      "sha256": "05baa7b8a00161ea4eb57168f0e79d6a5a0b77e447a942b2644d253d47fcc75a"
+    },
+    {
+      "file": "actions\\emit_event.schema.json",
+      "sha256": "b092546bd90987c0a106f90622bcb2208e35f50f6feb5a1c78eead1c6c184f32"
+    },
+    {
+      "file": "actions\\file_read.schema.json",
+      "sha256": "0af5ee291392eb9471b0ee777df3f6973e516ff313e277694519abb2e4966dc2"
+    },
+    {
+      "file": "actions\\file_write.schema.json",
+      "sha256": "2118bc6ff833a61a9aa7f8e16008fa8f30e22442ba82d9639d37d54560a3173a"
+    },
+    {
+      "file": "actions\\http_fetch.schema.json",
+      "sha256": "6509d3b9ebd617b837cec60eb87d1aa72c6af3cb2ce8bf0c4e7c2dcb6273a925"
+    },
+    {
+      "file": "actions\\if.schema.json",
+      "sha256": "a36ddf4546ec794b080fc051ed1c6d34d7b20960d23c7343acfa171a140c9ff4"
+    },
+    {
+      "file": "actions\\json_patch.schema.json",
+      "sha256": "78d02f6f97fa1caa19c025a810b29fb26d2629e6ad05ebe2ca6ed559ba8e33be"
+    },
+    {
+      "file": "actions\\log.schema.json",
+      "sha256": "6543599de616d94595ee3f573243626c1ec69d07113a54626b86ba0161c7e8ed"
+    },
+    {
+      "file": "actions\\parallel.schema.json",
+      "sha256": "163aacb4ddb327c913d39b102e1cccbeb13dcb16d7ec4f1c066a34119cdfdeeb"
+    },
+    {
+      "file": "actions\\parse_json.schema.json",
+      "sha256": "0d7cb0b3aeb91239fd9c8dcf2a186d0475b20e58faaf862805d7dc25670e2ed5"
+    },
+    {
+      "file": "actions\\print.schema.json",
+      "sha256": "30b5d77aaf80383af9e891a9b300b00a96a8febb535a734f3a8638cfe36d1741"
+    },
+    {
+      "file": "actions\\regex_extract.schema.json",
+      "sha256": "7a9230bc4ec5131509eef30de7cbc8abcfe145096ed6404559ef1f8609d624df"
+    },
+    {
+      "file": "actions\\repeat.schema.json",
+      "sha256": "1b232dd13c0acfbda0c49d64f7c6c37ac3c88d8465677f0fc4b4f119d943cd45"
+    },
+    {
+      "file": "actions\\set.schema.json",
+      "sha256": "657ded87ac821f136144114d590fad1eb82f7fdfcec278442277bfe55e9d9dc9"
+    },
+    {
+      "file": "actions\\sleep.schema.json",
+      "sha256": "55d53db1c69051d047354acaf864947336cae6f0d3075dec363bbef9ec399a3e"
+    },
+    {
+      "file": "actions\\tool_call.schema.json",
+      "sha256": "c0ab96bb1bef135a8fba386e4a960a91a23975724e30e49b85662b546977f785"
+    },
+    {
+      "file": "actions\\transform.schema.json",
+      "sha256": "c85abd252d5a8a6f92155c75739286a210f9d33fa53095e2055bcae7c82c9cb1"
+    },
+    {
+      "file": "actions\\vnl.schema.json",
+      "sha256": "8db06648e1b8e3391de1707539f67d36b786464d3e09f47e37c403f2bda0fb26"
+    },
+    {
+      "file": "common\\http_status.route.json",
+      "sha256": "0ef3a66d3ce371f274d21c7cadafd24436d0ecc150c6c013c9aec08654415e74"
+    },
+    {
+      "file": "envelope.3.3.schema.json",
+      "sha256": "978662c178ac5bbe723684b73fed8e51e7405e9f41e3397e64f09a26912cc8d2"
+    },
+    {
+      "file": "policies.schema.json",
+      "sha256": "19c750a2c925a9d5885d37f3698c159b813558d2e6e56c7669250734e89ffce6"
+    },
+    {
+      "file": "route.1.0.schema.json",
+      "sha256": "3d2dc82d7980f7d8495405416892cd0252f0abd1f961127d1e303a3cf6134cf8"
+    }
+  ]
+}

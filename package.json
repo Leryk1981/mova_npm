@@ -1,0 +1,12 @@
+{
+  "name": "mova",
+  "version": "0.1.0",
+  "description": "UA JSON Language for MOVA",
+  "type": "module",
+  "scripts": {
+    "ua:envelope": "node scripts/uk_to_en.mjs templates/ua/план_укр_min.json",
+    "ua:route": "node scripts/uk_to_en.mjs templates/ua/маршрут_укр_min_http_plan_ref.json"
+  },
+  "author": "",
+  "license": "MIT"
+}

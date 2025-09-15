@@ -1,0 +1,157 @@
+{
+  "_meta": {
+    "version": "0.1",
+    "source": "TZ.md п.3.1-3.4 + цей JSON як джерело істини",
+    "description": "Dev-лексикон для нормалізації VNL → JSON"
+  },
+  "verbs": [
+    "create",
+    "update",
+    "delete",
+    "get",
+    "list",
+    "search",
+    "send",
+    "notify",
+    "schedule",
+    "sync",
+    "fetch",
+    "parse",
+    "transform",
+    "validate",
+    "log",
+    "route"
+  ],
+  "nouns": [
+    "lead",
+    "deal",
+    "invoice",
+    "ticket",
+    "message",
+    "email",
+    "webhook",
+    "file",
+    "dataset",
+    "report",
+    "schedule",
+    "config",
+    "account",
+    "profile",
+    "template",
+    "job",
+    "event",
+    "payment",
+    "customer",
+    "endpoint",
+    "cache",
+    "queue"
+  ],
+  "prepositions": {
+    "to": "адресат/призначення (email/channel/url/user)",
+    "from": "джерело",
+    "with": "дані (об'єкт/поля/JSON)",
+    "for": "суб'єкт/отримувач",
+    "via": "канал/метод (slack/http/smtp…)",
+    "by": "канал/метод (slack/http/smtp…)",
+    "in": "контейнер/платформа/час (ISO-8601)",
+    "on": "контейнер/платформа/час (ISO-8601)",
+    "at": "контейнер/платформа/час (ISO-8601)"
+  },
+  "canon_map": {
+    "endpoint": [
+      "url",
+      "route",
+      "api_url"
+    ],
+    "payload": [
+      "body",
+      "data"
+    ],
+    "headers": [
+      "http_headers"
+    ],
+    "query": [
+      "querystring",
+      "qs"
+    ],
+    "status_code": [
+      "http_code"
+    ],
+    "timeout_ms": [
+      "timeout"
+    ],
+    "dlq": [
+      "dead_letter_queue"
+    ],
+    "env": [
+      "environment",
+      "env_vars"
+    ],
+    "api_key": [
+      "token"
+    ],
+    "rate_limit": [
+      "throttle",
+      "qps",
+      "rps"
+    ],
+    "idempotency_key": [
+      "idem_key"
+    ]
+  },
+  "registry": {
+    "http_api": [
+      "endpoint",
+      "payload",
+      "headers",
+      "query",
+      "status_code",
+      "timeout_ms",
+      "retry.backoff_ms",
+      "rate_limit"
+    ],
+    "auth": [
+      "auth",
+      "api_key",
+      "oauth2",
+      "jwt",
+      "signature",
+      "hmac"
+    ],
+    "queues": [
+      "queue",
+      "topic",
+      "dlq",
+      "idempotency_key"
+    ],
+    "reliability": [
+      "circuit_breaker",
+      "sla",
+      "slo",
+      "sli"
+    ],
+    "obs": [
+      "log_level",
+      "trace",
+      "metrics"
+    ]
+  },
+  "reserved": [
+    "mova_version",
+    "route_version",
+    "intent",
+    "actions",
+    "trigger",
+    "invoke",
+    "policies",
+    "match",
+    "map"
+  ],
+  "log_levels": ["debug", "info", "warn", "error"],
+  "style_rules": {
+    "case": "lower_snake_case",
+    "dates": "ISO-8601",
+    "currency": "ISO-4217",
+    "durations": "*_ms suffix"
+  }
+}

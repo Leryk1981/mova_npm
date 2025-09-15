@@ -1,0 +1,15 @@
+{
+  "name": "mova-node-scripts-curated",
+  "version": "0.4.0",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "mova": "bin/mova.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "yargs": "^17.7.2",
+    "fast-glob": "^3.3.2"
+  }
+}

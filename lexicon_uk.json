@@ -1,0 +1,28 @@
+{
+  "версія": "mova_version",
+  "дії": "actions",
+
+  "версія_маршруту": "route_version",
+  "тригер": "trigger",
+  "виклик": "invoke",
+  "план": "plan",
+  "посилання_на_план": "plan_ref",
+
+  "опис": "description",
+  "політики": "policies",
+  "таймаут_мс": "timeout_ms",
+  "повтор": "retry",
+  "мертва_черга": "dlq",
+  "бюджет_мс": "budget_ms",
+
+  "черга": "queue",
+  "розклад": "schedule",
+  "подія": "event",
+  "http": "http",
+
+  "шлях": "path",
+  "метод": "method",
+
+  "змінні": "vars",
+  "навантаження": "payload"
+}
