@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-2020-12/schema",
-  "$id": "https://mova.org/schemas/actions/delay.schema.json",
+  "$id": "https://mova.dev/schemas/actions/delay.schema.json",
   "title": "Action: Delay",
   "description": "Схема для дії, що створює затримку у виконанні плану.",
   "type": "object",

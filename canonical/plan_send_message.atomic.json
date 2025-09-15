@@ -1,0 +1,21 @@
+{
+  "mova_version": "3.3",
+  "id": "mova.send_message.atomic",
+  "description": "Atomic call for mova.send_message",
+  "policies": {
+    "timeout_ms": 10000,
+    "retry": {
+      "max_attempts": 1
+    }
+  },
+  "actions": [
+    {
+      "type": "emit_event",
+      "channel": "mova.send_message",
+      "payload": {
+        "topic": "${topic}",
+        "payload": "${payload}"
+      }
+    }
+  ]
+}

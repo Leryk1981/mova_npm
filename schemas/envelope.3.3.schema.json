@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-2020-12/schema",
-  "$id": "https://mova.org/schemas/envelope.3.3.schema.json",
+  "$id": "https://mova.dev/schemas/envelope.3.3.schema.json",
   "title": "MOVA Envelope",
   "description": "Канонічна схема для 'конверта' або 'плану' MOVA.",
   "type": "object",
@@ -45,7 +45,24 @@
         { "$ref": "actions/switch.schema.json" },
         { "$ref": "actions/parallel.schema.json" },
         { "$ref": "actions/try.schema.json" },
-        { "$ref": "actions/delay.schema.json" }
+        { "$ref": "actions/delay.schema.json" },
+        { "$ref": "actions/emit_event.schema.json" },
+        { "$ref": "actions/read_file.schema.json" },
+        { "$ref": "actions/assert.schema.json" },
+        { "$ref": "actions/base64.schema.json" },
+        { "$ref": "actions/call.schema.json" },
+        { "$ref": "actions/file_read.schema.json" },
+        { "$ref": "actions/file_write.schema.json" },
+        { "$ref": "actions/if.schema.json" },
+        { "$ref": "actions/json_patch.schema.json" },
+        { "$ref": "actions/parse_json.schema.json" },
+        { "$ref": "actions/print.schema.json" },
+        { "$ref": "actions/regex_extract.schema.json" },
+        { "$ref": "actions/repeat.schema.json" },
+        { "$ref": "actions/sleep.schema.json" },
+        { "$ref": "actions/tool_call.schema.json" },
+        { "$ref": "actions/transform.schema.json" },
+        { "$ref": "actions/vnl.schema.json" }
       ]
     }
   }

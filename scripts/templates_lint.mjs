@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync, existsSync } from 'fs';
-import { resolve, dirname, join } from 'path';
+import { readFileSync, readdirSync, existsSync, statSync } from 'fs';
+import { resolve, dirname, join, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +21,24 @@ if (!inputDirRelativePath) {
 }
 
 const inputDirFullPath = resolve(root, inputDirRelativePath);
-const files = readdirSync(inputDirFullPath).filter(f => f.endsWith('.json'));
+
+// Рекурсивна функція для пошуку всіх .json файлів
+function findJsonFiles(startPath) {
+  let results = [];
+  const files = readdirSync(startPath);
+  for (const file of files) {
+    const filename = join(startPath, file);
+    const stat = statSync(filename);
+    if (stat.isDirectory()) {
+      results = results.concat(findJsonFiles(filename));
+    } else if (filename.endsWith('.json')) {
+      results.push(filename);
+    }
+  }
+  return results;
+}
+
+const files = findJsonFiles(inputDirFullPath);
 let hasErrors = false;
 
 function checkKeys(obj, filePath) {
@@ -43,9 +60,9 @@ function checkKeys(obj, filePath) {
 }
 
 console.log(`--- Лінтер шаблонів у ${inputDirRelativePath} ---`);
-files.forEach(fileName => {
-  const filePath = join(inputDirRelativePath, fileName);
-  const fileContent = readFileSync(resolve(root, filePath), 'utf-8');
+files.forEach(fullPath => {
+  const filePath = relative(root, fullPath);
+  const fileContent = readFileSync(fullPath, 'utf-8');
 
   if (fileContent.trim() === '') {
     console.warn(`⚠️  Файл ${filePath} порожній і буде проігнорований.`);

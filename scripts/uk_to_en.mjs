@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
-import { resolve, dirname, basename, join } from 'path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from 'fs';
+import { resolve, dirname, basename, join, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 // Визначаємо кореневу директорію проєкту
@@ -49,6 +49,22 @@ function translateObject(obj) {
   return obj;
 }
 
+// Рекурсивна функція для пошуку всіх .json файлів
+function findJsonFiles(startPath) {
+  let results = [];
+  const files = readdirSync(startPath);
+  for (const file of files) {
+    const filename = join(startPath, file);
+    const stat = statSync(filename);
+    if (stat.isDirectory()) {
+      results = results.concat(findJsonFiles(filename));
+    } else if (filename.endsWith('.json')) {
+      results.push(filename);
+    }
+  }
+  return results;
+}
+
 // 4. Створюємо директорію для канонічних файлів
 const outputDir = resolve(projectRoot, 'canonical');
 if (!existsSync(outputDir)) {
@@ -57,8 +73,7 @@ if (!existsSync(outputDir)) {
 }
 
 // 5. Читаємо та обробляємо всі файли з директорії
-const files = readdirSync(inputDirFullPath);
-const jsonFiles = files.filter(file => file.endsWith('.json'));
+const jsonFiles = findJsonFiles(inputDirFullPath);
 
 if (jsonFiles.length === 0) {
   console.warn(`⚠️  Не знайдено жодного .json файлу в директорії ${inputDirRelativePath}`);
@@ -67,9 +82,8 @@ if (jsonFiles.length === 0) {
 
 console.log(`--- Початок трансляції файлів з ${inputDirRelativePath} ---`);
 
-jsonFiles.forEach(fileName => {
-  const inputFileRelativePath = join(inputDirRelativePath, fileName);
-  const inputFullPath = resolve(projectRoot, inputFileRelativePath);
+jsonFiles.forEach(inputFullPath => {
+  const inputFileRelativePath = relative(projectRoot, inputFullPath);
 
   try {
     const ukJsonContent = readFileSync(inputFullPath, 'utf-8');
@@ -80,7 +94,7 @@ jsonFiles.forEach(fileName => {
     const ukJson = JSON.parse(ukJsonContent);
     const enJson = translateObject(ukJson);
 
-    const outputFilename = basename(inputFileRelativePath)
+    const outputFilename = basename(inputFullPath)
       .replace('план_укр', 'plan')
       .replace('маршрут_укр', 'route')
       .replace('_укр', '');

@@ -1,0 +1,10 @@
+{
+  "mova_version": "3.3",
+  "id": "example.minimal",
+  "actions": [
+    {
+      "type": "log",
+      "message": "Hello ${vars.name}"
+    }
+  ]
+}

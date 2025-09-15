@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-2020-12/schema",
-  "$id": "https://mova.org/schemas/actions/set.schema.json",
+  "$id": "https://mova.dev/schemas/actions/set.schema.json",
   "title": "Action: Set Variable",
   "description": "Схема для дії, що встановлює значення змінної в контексті.",
   "type": "object",

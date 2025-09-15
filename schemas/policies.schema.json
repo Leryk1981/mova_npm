@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-2020-12/schema",
-  "$id": "https://mova.org/schemas/policies.schema.json",
+  "$id": "https://mova.dev/schemas/policies.schema.json",
   "title": "MOVA Policies",
   "description": "Канонічна схема для 'політик' MOVA.",
   "type": "object",

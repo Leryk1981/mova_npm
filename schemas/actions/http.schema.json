@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-2020-12/schema",
-  "$id": "https://mova.org/schemas/actions/http.schema.json",
+  "$id": "https://mova.dev/schemas/actions/http.schema.json",
   "title": "Action: HTTP Request",
   "description": "Схема для дії, що виконує HTTP-запит.",
   "type": "object",

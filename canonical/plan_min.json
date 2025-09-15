@@ -3,10 +3,7 @@
   "actions": [
     {
       "type": "log",
-      "invoke": "console:log",
-      "payload": {
-        "message": "Починаємо..."
-      }
+      "message": "Починаємо..."
     },
     {
       "type": "delay",
@@ -17,10 +14,7 @@
     },
     {
       "type": "log",
-      "invoke": "console:log",
-      "payload": {
-        "message": "Завершено після 2-секундної затримки."
-      }
+      "message": "Завершено після 2-секундної затримки."
     }
   ]
 }

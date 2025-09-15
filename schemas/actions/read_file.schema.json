@@ -1,0 +1,21 @@
+ {
+  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$id": "https://mova.dev/schemas/actions/read_file.schema.json",
+  "title": "Action: Read File",
+  "description": "Схема для дії, що читає вміст файлу.",
+  "type": "object",
+  "properties": {
+    "type": { "const": "read_file" },
+    "invoke": { "const": "fs:read" },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "encoding": { "type": "string", "default": "utf8" },
+        "result_in": { "type": "string" }
+      },
+      "required": ["path"]
+    }
+  },
+  "required": ["type", "invoke", "payload"]
+}

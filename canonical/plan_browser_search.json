@@ -1,0 +1,39 @@
+{
+  "mova_version": "3.3",
+  "id": "mova.recipes.browser_search",
+  "policies": {
+    "timeout_ms": 15000,
+    "retry": {
+      "max_attempts": 1
+    }
+  },
+  "vars": {
+    "url": "${url}",
+    "query": "${query}",
+    "result_index": "${result_index}"
+  },
+  "actions": [
+    {
+      "type": "emit_event",
+      "channel": "mova.browser_navigate",
+      "payload": {
+        "url": "${url}"
+      }
+    },
+    {
+      "type": "emit_event",
+      "channel": "mova.browser_input",
+      "payload": {
+        "text": "${query}",
+        "press_enter": true
+      }
+    },
+    {
+      "type": "emit_event",
+      "channel": "mova.browser_click",
+      "payload": {
+        "index": "${result_index}"
+      }
+    }
+  ]
+}

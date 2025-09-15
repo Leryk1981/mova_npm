@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
 import { resolve, dirname, basename, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -7,16 +7,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, '..');
 
-// --- Отримання вхідного файлу ---
-const inputFileRelativePath = process.argv[2];
-if (!inputFileRelativePath) {
-  console.error('❌ Помилка: Вкажіть шлях до канонічного англомовного файлу для перекладу.');
-  process.exit(1);
-}
-
-const inputFullPath = resolve(projectRoot, inputFileRelativePath);
-if (!existsSync(inputFullPath)) {
-  console.error(`❌ Помилка: Вхідний файл не знайдено за шляхом: ${inputFullPath}`);
+// --- Налаштування директорій ---
+const inputDirRelativePath = 'canonical';
+const inputDirFullPath = resolve(projectRoot, inputDirRelativePath);
+if (!existsSync(inputDirFullPath)) {
+  console.error(`❌ Помилка: Вхідну директорію не знайдено за шляхом: ${inputDirFullPath}`);
   process.exit(1);
 }
 
@@ -71,26 +66,52 @@ if (!existsSync(outputDir)) {
   console.log(`📂 Створено директорію: ${outputDir}`);
 }
 
-// --- Обробка файлу ---
-console.log(`--- Початок перекладу файлу ${inputFileRelativePath} ---`);
+// --- Читання та обробка файлів ---
+const allFiles = readdirSync(inputDirFullPath);
+const allJsonFiles = allFiles.filter(file => file.endsWith('.json'));
+const jsonFiles = allJsonFiles.filter(file => file.startsWith('plan_') || file.startsWith('route_'));
+const ignoredFiles = allJsonFiles.filter(file => !jsonFiles.includes(file) && file !== 'manifest.json');
 
-try {
-  const enJsonContent = readFileSync(inputFullPath, 'utf-8');
-  const enJson = JSON.parse(enJsonContent);
-  const ukJson = translateObjectReverse(enJson);
-
-  const baseFilename = basename(inputFileRelativePath);
-  const outputFilename = baseFilename
-    .replace('plan_', 'план_укр_')
-    .replace('route_', 'маршрут_укр_');
-
-  const outputFullPath = join(outputDir, outputFilename);
-  writeFileSync(outputFullPath, JSON.stringify(ukJson, null, 2), 'utf-8');
-  console.log(`✅ ${inputFileRelativePath} -> ${join('templates/ua/from-en', outputFilename)}`);
-} catch (error) {
-  console.error(`❌ Помилка під час обробки файлу ${inputFileRelativePath}:`);
-  console.error(error);
-  process.exit(1);
+if (ignoredFiles.length > 0) {
+  console.log('\n⚠️  Наступні .json файли було проігноровано через невідповідність імені:');
+  ignoredFiles.forEach(f => console.log(`   - ${f}`));
+  console.log('\n   Щоб файли були оброблені, їх імена мають починатися з "plan_" або "route_".\n');
 }
+
+if (jsonFiles.length === 0) {
+  console.warn(`🤷 Не знайдено файлів для перекладу, що відповідають шаблону (plan_*.json, route_*.json) в директорії '${inputDirRelativePath}'.`);
+  process.exit(0);
+}
+
+console.log(`--- Початок перекладу файлів з ${inputDirRelativePath} ---`);
+
+jsonFiles.forEach(fileName => {
+  const inputFileRelativePath = join(inputDirRelativePath, fileName);
+  const inputFullPath = resolve(projectRoot, inputFileRelativePath);
+
+  try {
+    const enJsonContent = readFileSync(inputFullPath, 'utf-8');
+    const enJson = JSON.parse(enJsonContent);
+    const ukJson = translateObjectReverse(enJson);
+
+    const baseFilename = basename(inputFileRelativePath);
+    let outputFilename;
+    if (baseFilename.startsWith('plan_')) {
+        outputFilename = 'план_укр_' + baseFilename.substring('plan_'.length);
+    } else if (baseFilename.startsWith('route_')) {
+        outputFilename = 'маршрут_укр_' + baseFilename.substring('route_'.length);
+    } else {
+        // Цей випадок не має трапитись через фільтр вище, але для безпеки:
+        outputFilename = baseFilename;
+    }
+
+    const outputFullPath = join(outputDir, outputFilename);
+    writeFileSync(outputFullPath, JSON.stringify(ukJson, null, 2), 'utf-8');
+    console.log(`✅ ${inputFileRelativePath} -> ${join('templates/ua/from-en', outputFilename)}`);
+  } catch (error) {
+    console.error(`❌ Помилка під час обробки файлу ${inputFileRelativePath}:`);
+    console.error(error);
+  }
+});
 
 console.log('--- Переклад завершено ---');

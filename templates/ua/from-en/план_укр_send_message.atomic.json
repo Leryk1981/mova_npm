@@ -1,0 +1,21 @@
+{
+  "версія": "3.3",
+  "id": "mova.send_message.atomic",
+  "опис": "Atomic call for mova.send_message",
+  "політики": {
+    "таймаут_мс": 10000,
+    "повтор": {
+      "max_attempts": 1
+    }
+  },
+  "дії": [
+    {
+      "тип": "emit_event",
+      "channel": "mova.send_message",
+      "навантаження": {
+        "topic": "${topic}",
+        "навантаження": "${payload}"
+      }
+    }
+  ]
+}

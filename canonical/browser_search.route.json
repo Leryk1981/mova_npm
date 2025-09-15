@@ -1,0 +1,13 @@
+{
+  "route_version": "1.0",
+  "trigger": {
+    "type": "http",
+    "http": {
+      "method": "POST",
+      "path": "/mova/browser-search"
+    }
+  },
+  "invoke": {
+    "plan_ref": "plans/browser_search.json"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "версія": "3.3",
+  "id": "mova.recipes.fs_copy_file",
+  "політики": {
+    "таймаут_мс": 8000,
+    "повтор": {
+      "max_attempts": 1
+    }
+  },
+  "змінні": {
+    "src_path": "${src_path}",
+    "dst_path": "${dst_path}"
+  },
+  "дії": [
+    {
+      "тип": "emit_event",
+      "channel": "mova.file_read",
+      "навантаження": {
+        "шлях": "${src_path}"
+      }
+    },
+    {
+      "тип": "emit_event",
+      "channel": "mova.file_write",
+      "навантаження": {
+        "шлях": "${dst_path}",
+        "content": "${content}"
+      }
+    }
+  ]
+}

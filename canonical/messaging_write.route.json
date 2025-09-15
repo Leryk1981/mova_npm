@@ -1,0 +1,26 @@
+{
+  "route_version": "1.0",
+  "description": "Route for messaging and writing document",
+  "policies": {
+    "timeout_ms": 15000,
+    "retry": {
+      "max_attempts": 1
+    }
+  },
+  "trigger": {
+    "type": "http",
+    "http": {
+      "method": "POST",
+      "path": "/mova/recipes/messaging-write"
+    }
+  },
+  "map": {
+    "topic": "${payload.topic}",
+    "payload": "${payload.payload}",
+    "content": "${payload.content}",
+    "format": "${payload.format}"
+  },
+  "invoke": {
+    "plan_ref": "plans/messaging_write.json"
+  }
+}

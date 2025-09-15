@@ -1,0 +1,20 @@
+{
+  "версія": "3.3",
+  "id": "mova.shell_execute.atomic",
+  "опис": "Atomic call for mova.shell_execute",
+  "політики": {
+    "таймаут_мс": 10000,
+    "повтор": {
+      "max_attempts": 1
+    }
+  },
+  "дії": [
+    {
+      "тип": "emit_event",
+      "channel": "mova.shell_execute",
+      "навантаження": {
+        "command": "${command}"
+      }
+    }
+  ]
+}

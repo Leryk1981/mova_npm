@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-2020-12/schema",
-  "$id": "https://mova.org/schemas/actions/switch.schema.json",
+  "$id": "https://mova.dev/schemas/actions/switch.schema.json",
   "title": "Action: Switch",
   "description": "Схема для дії, що виконує блок дій на основі значення.",
   "type": "object",
@@ -13,9 +13,9 @@
         "value": {},
         "cases": {
           "type": "object",
-          "additionalProperties": { "$ref": "https://mova.org/schemas/envelope.3.3.schema.json#/properties/actions" }
+          "additionalProperties": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
         },
-        "default": { "$ref": "https://mova.org/schemas/envelope.3.3.schema.json#/properties/actions" }
+        "default": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
       },
       "required": ["value", "cases"]
     }

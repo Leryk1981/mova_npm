@@ -1,0 +1,20 @@
+{
+  "версія": "3.3",
+  "id": "mova.deploy_service.atomic",
+  "опис": "Atomic call for mova.deploy_service",
+  "політики": {
+    "таймаут_мс": 10000,
+    "повтор": {
+      "max_attempts": 1
+    }
+  },
+  "дії": [
+    {
+      "тип": "emit_event",
+      "channel": "mova.deploy_service",
+      "навантаження": {
+        "service_name": "${service_name}"
+      }
+    }
+  ]
+}

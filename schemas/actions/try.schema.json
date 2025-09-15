@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-2020-12/schema",
-  "$id": "https://mova.org/schemas/actions/try.schema.json",
+  "$id": "https://mova.dev/schemas/actions/try.schema.json",
   "title": "Action: Try/Catch/Finally",
   "description": "Схема для дії, що забезпечує обробку помилок та очищення.",
   "type": "object",
@@ -10,15 +10,15 @@
     "payload": {
       "type": "object",
       "properties": {
-        "try": { "$ref": "https://mova.org/schemas/envelope.3.3.schema.json#/properties/actions" },
+        "try": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" },
         "catch": {
           "type": "object",
           "properties": {
             "as": { "type": "string", "default": "error" },
-            "actions": { "$ref": "https://mova.org/schemas/envelope.3.3.schema.json#/properties/actions" }
+            "actions": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
           }
         },
-        "finally": { "$ref": "https://mova.org/schemas/envelope.3.3.schema.json#/properties/actions" }
+        "finally": { "$ref": "https://mova.dev/schemas/envelope.3.3.schema.json#/properties/actions" }
       },
       "required": ["try"]
     }

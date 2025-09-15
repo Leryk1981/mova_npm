@@ -1,0 +1,25 @@
+{
+  "route_version": "1.0",
+  "description": "Route for shell and file operations",
+  "policies": {
+    "timeout_ms": 10000,
+    "retry": {
+      "max_attempts": 1
+    }
+  },
+  "trigger": {
+    "type": "http",
+    "http": {
+      "method": "POST",
+      "path": "/mova/recipes/shell-fs"
+    }
+  },
+  "map": {
+    "command": "${payload.command}",
+    "src_path": "${payload.src_path}",
+    "dst_path": "${payload.dst_path}"
+  },
+  "invoke": {
+    "plan_ref": "fs_copy_file.json"
+  }
+}

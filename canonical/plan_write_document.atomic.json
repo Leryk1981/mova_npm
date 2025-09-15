@@ -1,0 +1,21 @@
+{
+  "mova_version": "3.3",
+  "id": "mova.write_document.atomic",
+  "description": "Atomic call for mova.write_document",
+  "policies": {
+    "timeout_ms": 10000,
+    "retry": {
+      "max_attempts": 1
+    }
+  },
+  "actions": [
+    {
+      "type": "emit_event",
+      "channel": "mova.write_document",
+      "payload": {
+        "content": "${content}",
+        "format": "${format}"
+      }
+    }
+  ]
+}

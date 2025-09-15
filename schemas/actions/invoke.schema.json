@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-2020-12/schema",
-  "$id": "https://mova.org/schemas/actions/invoke.schema.json",
+  "$id": "https://mova.dev/schemas/actions/invoke.schema.json",
   "title": "Action: Invoke Plan",
   "description": "Схема для дії, що викликає інший план.",
   "type": "object",
