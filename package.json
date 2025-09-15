@@ -4,9 +4,15 @@
   "description": "UA JSON Language for MOVA",
   "type": "module",
   "scripts": {
-    "ua:envelope": "node scripts/uk_to_en.mjs templates/ua/план_укр_min.json",
-    "ua:route": "node scripts/uk_to_en.mjs templates/ua/маршрут_укр_min_http_plan_ref.json"
+    "translate": "node scripts/uk_to_en.mjs templates/ua",
+    "validate": "node scripts/validate.mjs",
+    "build": "npm run translate && npm run validate",
+    "run:plan": "node scripts/run.mjs canonical/plan_min.json"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
 }
