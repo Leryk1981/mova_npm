@@ -1,33 +1,45 @@
 {
   "mova_version": "3.3",
-  "$comment": "WooCommerce: pobrać zamówienia z paginacją i zapisać w NDJSON.",
+  "$comment": "WooCommerce: отримання замовлень із пагінацією, запис у NDJSON.",
   "actions": [
     {
-      "type": "secrets.get",
+      "type": "отримати_секрет",
       "name": "<CK_SECRET_NAME>",
       "out": "vars.ck"
     },
     {
-      "type": "secrets.get",
+      "type": "отримати_секрет",
       "name": "<CS_SECRET_NAME>",
       "out": "vars.cs"
     },
     {
-      "type": "ustawić_zmienną",
-      "variable": "vars.base",
+      "type": "set",
+      "to": "vars.base",
       "value": "<BASE_URL>"
     },
     {
-      "type": "ustawić_zmienną",
-      "variable": "vars.page",
+      "type": "set",
+      "to": "vars.page",
       "value": 1
     },
     {
-      "type": "powtórzyć",
-      "count": 10,
-      "actions": [
+      "type": "for_each",
+      "список": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "loop_variable": "i",
+      "body": [
         {
-          "type": "http_request",
+          "type": "http_fetch",
           "method": "GET",
           "url": "${vars.base}/wp-json/wc/v3/orders",
           "auth": {
@@ -49,20 +61,19 @@
           "then": [
             {
               "type": "for_each",
-              "lista": "${vars.page_data}",
+              "list": "${vars.page_data}",
               "loop_variable": "order",
               "actions": [
                 {
-                  "type": "zapisać_plik",
+                  "type": "file_append_jsonl",
                   "path": "<OUT_FILE>",
-                  "value": "${order}",
-                  "mode": "append_jsonl"
+                  "value": "${order}"
                 }
               ]
             },
             {
-              "type": "ustawić_zmienną",
-              "variable": "vars.page",
+              "type": "set",
+              "to": "vars.page",
               "value": "${vars.page + 1}"
             }
           ],

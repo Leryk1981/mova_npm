@@ -11,7 +11,7 @@
   },
   "actions": [
     {
-      "type": "друк",
+      "type": "print",
       "message": "Готую JSON-LD"
     }
   ]
