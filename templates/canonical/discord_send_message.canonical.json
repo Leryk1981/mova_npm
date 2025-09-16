@@ -3,12 +3,12 @@
   "$comment": "Discord: wysłać wiadomość przez Incoming Webhook.",
   "actions": [
     {
-      "type": "pobrać_sekret",
+      "type": "secrets.get",
       "name": "<DISCORD_WEBHOOK_SECRET_NAME>",
       "out": "vars.webhook"
     },
     {
-      "type": "żądanie_http",
+      "type": "http_request",
       "method": "POST",
       "url": "${vars.webhook}",
       "headers": {
@@ -22,7 +22,7 @@
       "out": "vars.resp"
     },
     {
-      "type": "drukować",
+      "type": "print",
       "message": "Discord zaakceptował (status w vars.resp.__status)"
     }
   ]

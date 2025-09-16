@@ -3,12 +3,12 @@
   "$comment": "WooCommerce: pobrać zamówienia z paginacją i zapisać w NDJSON.",
   "actions": [
     {
-      "type": "pobrać_sekret",
+      "type": "secrets.get",
       "name": "<CK_SECRET_NAME>",
       "out": "vars.ck"
     },
     {
-      "type": "pobrać_sekret",
+      "type": "secrets.get",
       "name": "<CS_SECRET_NAME>",
       "out": "vars.cs"
     },
@@ -27,7 +27,7 @@
       "count": 10,
       "actions": [
         {
-          "type": "żądanie_http",
+          "type": "http_request",
           "method": "GET",
           "url": "${vars.base}/wp-json/wc/v3/orders",
           "auth": {

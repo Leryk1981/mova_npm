@@ -33,7 +33,7 @@
       "$comment": "Lub na podstawie root typ_ładunku; zduplikowane dla jasności."
     },
     {
-      "type": "drukować",
+      "type": "print",
       "message": "JSON-LD LocalBusiness zapisany w <OUT_FILE>"
     }
   ]

@@ -49,6 +49,7 @@
   "ms": "ms",
   "dziennik": "log",
   "ustawić_zmienną": "set",
+  "pobrać_sekret": "secrets.get",
   "żądanie_http": "http_request",
   "równolegle": "parallel",
   "wygenerować_zdarzenie": "emit_event",

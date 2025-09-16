@@ -2,7 +2,7 @@
   "mova_version": "3.3",
   "actions": [
     {
-      "type": "drukować",
+      "type": "print",
       "message": "Witaj MOVA!"
     }
   ]
