@@ -1,5 +1,6 @@
 {
   "версія": "mova_version",
+  "контекст": "@context",
   "дії": "actions",
   "версія_маршруту": "route_version",
   "тригер": "trigger",

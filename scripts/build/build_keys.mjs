@@ -1,10 +1,10 @@
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const root = resolve(__dirname, "..");
+const root = resolve(__dirname, "../..");
 
 const SCHEMAS = [
   "schemas/core/envelope.3.3.schema.json",
@@ -31,4 +31,6 @@ for (const rel of SCHEMAS) {
   collect(schema, all);
 }
 
-console.log(JSON.stringify([...all].sort(), null, 2));
+const result = JSON.stringify([...all].sort(), null, 2);
+writeFileSync(resolve(root, "build/canonical_keys.json"), result, "utf8");
+console.log("✅ Канонічні ключі збережено в build/canonical_keys.json");

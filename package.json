@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "translate": "node scripts/translation/uk_to_en.mjs templates/ua",
+    "start:ui": "node server.js",
     "translate:en-ua": "node scripts/translation/en_to_uk.mjs",
     "validate": "node scripts/validation/validate_schemas.mjs",
     "build": "npm run build:keys && npm run build:ua && npm run build:manifest && npm run check:lexicon",
@@ -26,6 +27,10 @@
   "license": "MIT",
   "dependencies": {
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "serve": "^14.2.5"
   }
 }
