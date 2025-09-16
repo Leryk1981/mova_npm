@@ -29,6 +29,10 @@
     "scaffold:stripe:pi": "node scripts/scaffold.mjs templates/blank/ua/stripe_payment_intent_create_blank.json templates/ua/stripe_payment_intent_create.json AMOUNT_MINOR=2500 CURRENCY=EUR DESCRIPTION='Test order' STRIPE_KEY_NAME=STRIPE_API_KEY",
     "scaffold:sendgrid:mail": "node scripts/scaffold.mjs templates/blank/ua/sendgrid_send_mail_blank.json templates/ua/sendgrid_send_mail.json FROM_EMAIL=you@example.com TO_EMAILS=client@example.com SUBJECT='Hi' PLAIN_TEXT='Hello' HTML_CONTENT='<b>Hello</b>' SG_KEY_NAME=SENDGRID_API_KEY",
 
+    "scaffold:slack:message": "node scripts/scaffold.mjs templates/blank/ua/slack_send_message_blank.json templates/ua/slack_send_message.json SLACK_WEBHOOK_NAME=SLACK_WEBHOOK_URL MESSAGE_TEXT='Hello from MOVA!' CHANNEL='#general' USERNAME='MOVA Bot' ICON_EMOJI=':robot_face:'",
+    "scaffold:sheets:append": "node scripts/scaffold.mjs templates/blank/ua/google_sheets_append_blank.json templates/ua/google_sheets_append.json SHEETS_API_KEY_NAME=GOOGLE_SHEETS_TOKEN SPREADSHEET_ID=your_spreadsheet_id RANGE=Sheet1!A:B ROW_DATA_JSON='{\"values\": [[\"Name\", \"Email\", \"2024-01-01\"]]}'",
+    "scaffold:telegram:message": "node scripts/scaffold.mjs templates/blank/ua/telegram_send_message_blank.json templates/ua/telegram_send_message.json TELEGRAM_BOT_TOKEN_NAME=TELEGRAM_BOT_TOKEN CHAT_ID=123456789 MESSAGE_TEXT='Hello from MOVA!' PARSE_MODE='HTML' DISABLE_PREVIEW='false'",
+
     "ua:to:canonical": "node scripts/translation/translate.mjs templates/ua ua",
     "validate:canonical": "node scripts/validation/validate_schemas.mjs",
 

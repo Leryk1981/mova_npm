@@ -108,6 +108,9 @@ npm run scaffold:jsonld:event       # Створити JSON-LD бланк
 npm run scaffold:webhook:shopify    # Створити Shopify webhook
 npm run scaffold:stripe:pi          # Створити Stripe Payment Intent
 npm run scaffold:sendgrid:mail      # Створити SendGrid email
+npm run scaffold:slack:message      # Створити Slack повідомлення
+npm run scaffold:sheets:append      # Створити Google Sheets append
+npm run scaffold:telegram:message   # Створити Telegram повідомлення
 ```
 
 ## Бланки (Blank Templates)
@@ -192,6 +195,75 @@ SendGrid accepted (status in vars.sg_resp.__status)
 **Типові помилки:**
 - `401 Unauthorized` - невірний API ключ
 - `400 Bad Request` - невалідний email формат
+
+### ТЗ-04: Slack Incoming Webhook
+
+**Мета:** Надіслати повідомлення в Slack через webhook.
+
+**Як заповнити:**
+```bash
+npm run scaffold:slack:message
+```
+
+**Що робить:**
+- Отримує webhook URL через `secrets.get`
+- Надсилає POST запит до Slack з текстом та форматуванням
+- Підтримує канал, ім'я користувача, emoji
+
+**Очікуваний результат:**
+```
+Slack message sent (status: 200)
+```
+
+**Типові помилки:**
+- `400 Bad Request` - невірний webhook URL
+- `404 Not Found` - канал не існує
+
+### ТЗ-05: Google Sheets Append Row
+
+**Мета:** Додати рядок у Google Sheets для логування даних.
+
+**Як заповнити:**
+```bash
+npm run scaffold:sheets:append
+```
+
+**Що робить:**
+- Отримує API ключ через `secrets.get`
+- Використовує Google Sheets API для додавання рядка
+- Підтримує spreadsheetId, range та масив даних
+
+**Очікуваний результат:**
+```
+Row appended to Google Sheets (status: 200)
+```
+
+**Типові помилки:**
+- `403 Forbidden` - недостатньо прав доступу
+- `404 Not Found` - таблиця не існує
+
+### ТЗ-06: Telegram Bot Send Message
+
+**Мета:** Надіслати повідомлення користувачу/каналу в Telegram.
+
+**Як заповнити:**
+```bash
+npm run scaffold:telegram:message
+```
+
+**Що робить:**
+- Отримує bot token через `secrets.get`
+- Надсилає POST запит до Telegram Bot API
+- Підтримує HTML/Markdown форматування
+
+**Очікуваний результат:**
+```
+Telegram message sent (status: 200)
+```
+
+**Типові помилки:**
+- `401 Unauthorized` - невірний bot token
+- `403 Forbidden` - бот заблокований користувачем
 
 ## Розширення файлів
 

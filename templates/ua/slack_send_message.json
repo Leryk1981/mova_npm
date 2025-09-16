@@ -1,0 +1,30 @@
+{
+  "версія": "3.3",
+  "$comment": "Slack: надсилання повідомлення через Incoming Webhook.",
+  "дії": [
+    {
+      "type": "отримати_секрет",
+      "name": "SLACK_WEBHOOK_URL",
+      "out": "vars.webhook_url"
+    },
+    {
+      "type": "http_fetch",
+      "method": "POST",
+      "url": "${vars.webhook_url}",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "text": "'Hello",
+        "channel": "'#general'",
+        "username": "'MOVA",
+        "icon_emoji": "':robot_face:'"
+      },
+      "out": "vars.slack_response"
+    },
+    {
+      "type": "print",
+      "message": "Slack message sent (status: ${vars.slack_response.__status})"
+    }
+  ]
+}

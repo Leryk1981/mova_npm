@@ -1,0 +1,26 @@
+{
+  "версія": "3.3",
+  "$comment": "Google Sheets: додавання рядка з даними.",
+  "дії": [
+    {
+      "type": "отримати_секрет",
+      "name": "<SHEETS_API_KEY_NAME>",
+      "out": "vars.api_key"
+    },
+    {
+      "type": "http_fetch",
+      "method": "POST",
+      "url": "https://sheets.googleapis.com/v4/spreadsheets/<SPREADSHEET_ID>/values/<RANGE>:append?valueInputOption=RAW",
+      "headers": {
+        "Authorization": "Bearer ${vars.api_key}",
+        "Content-Type": "application/json"
+      },
+      "body": "<ROW_DATA_JSON>",
+      "out": "vars.sheets_response"
+    },
+    {
+      "type": "print",
+      "message": "Row appended to Google Sheets (status: ${vars.sheets_response.__status})"
+    }
+  ]
+}
