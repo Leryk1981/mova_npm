@@ -1,0 +1,34 @@
+{
+  "версія": "3.3",
+  "тип_навантаження": "application/ld+json",
+  "$comment": "JSON-LD LocalBusiness: базовий SEO профіль локального бізнесу.",
+  "навантаження": {
+    "@context": { "@vocab": "https://schema.org/", "@language": "uk" },
+    "@type": "LocalBusiness",
+    "name": "<BUSINESS_NAME>",
+    "url": "<URL>",
+    "logo": "<LOGO_URL>",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "<STREET_ADDRESS>",
+      "addressLocality": "<ADDRESS_LOCALITY>",
+      "addressRegion": "<ADDRESS_REGION>",
+      "postalCode": "<POSTAL_CODE>",
+      "addressCountry": "<ADDRESS_COUNTRY>"
+    },
+    "telephone": "<TELEPHONE>",
+    "openingHours": [
+      "<OPENING_HOURS_ARRAY>"
+    ]
+  },
+  "дії": [
+    {
+      "type": "file_write",
+      "path": "<OUT_FILE>",
+      "content": "${payload}",
+      "content_type": "application/ld+json",
+      "$comment": "Або покладатися на кореневий тип_навантаження; продубльовано для ясності."
+    },
+    { "type": "print", "message": "JSON-LD LocalBusiness збережено у <OUT_FILE>" }
+  ]
+}

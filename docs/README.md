@@ -111,6 +111,9 @@ npm run scaffold:sendgrid:mail      # Створити SendGrid email
 npm run scaffold:slack:message      # Створити Slack повідомлення
 npm run scaffold:sheets:append      # Створити Google Sheets append
 npm run scaffold:telegram:message   # Створити Telegram повідомлення
+npm run scaffold:discord:message    # Створити Discord повідомлення
+npm run scaffold:woo:orders         # Створити WooCommerce отримання замовлень
+npm run scaffold:jsonld:localbiz    # Створити JSON-LD LocalBusiness
 ```
 
 ## Бланки (Blank Templates)
@@ -264,6 +267,74 @@ Telegram message sent (status: 200)
 **Типові помилки:**
 - `401 Unauthorized` - невірний bot token
 - `403 Forbidden` - бот заблокований користувачем
+
+### ТЗ-07: Discord Webhook — надсилання повідомлення
+
+**Мета:** Надіслати повідомлення у Discord-канал через Incoming Webhook URL з мінімальними, але правильними полями.
+
+**Як заповнити:**
+```bash
+npm run scaffold:discord:message
+```
+
+**Що робить:**
+- Отримує webhook URL через `secrets.get`
+- Надсилає POST запит до Discord з JSON тілом
+- Підтримує текст, ім'я користувача, аватар
+
+**Очікуваний результат:**
+```
+Discord accepted (status in vars.resp.__status)
+```
+
+**Типові помилки:**
+- `400 Bad Request` - невірний webhook URL або відсутній content
+- `404 Not Found` - webhook не існує
+
+### ТЗ-08: WooCommerce — отримання замовлень (REST API)
+
+**Мета:** Отримати список замовлень із WooCommerce через REST API з підтримкою автентифікації та пагінації.
+
+**Як заповнити:**
+```bash
+npm run scaffold:woo:orders
+```
+
+**Що робить:**
+- Отримує consumer key/secret через `secrets.get`
+- Надсилає GET запити до WooCommerce API з пагінацією
+- Зберігає замовлення в NDJSON файл
+
+**Очікуваний результат:**
+```
+NDJSON файл з замовленнями
+```
+
+**Типові помилки:**
+- `401 Unauthorized` - невірні креденшли
+- `403 Forbidden` - недостатньо прав доступу
+
+### ТЗ-09: JSON-LD LocalBusiness — SEO-картка для локального бізнесу
+
+**Мета:** Згенерувати JSON-LD опис локального бізнесу для SEO з підтримкою schema.org.
+
+**Як заповнити:**
+```bash
+npm run scaffold:jsonld:localbiz
+```
+
+**Що робить:**
+- Створює JSON-LD payload з полями LocalBusiness
+- Записує у .jsonld файл
+- Підтримує адресу, телефон, години роботи
+
+**Очікуваний результат:**
+```
+JSON-LD LocalBusiness збережено у <OUT_FILE>
+```
+
+**Типові помилки:**
+- Валідаційна помилка - відсутній @context або обов'язкові поля
 
 ## Розширення файлів
 
