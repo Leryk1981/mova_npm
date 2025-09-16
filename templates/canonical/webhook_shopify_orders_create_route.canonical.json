@@ -1,20 +1,20 @@
 {
-  "версія_маршруту": "1.0",
+  "route_version": "1.0",
   "$comment": "Shopify orders/create: перевірка HMAC + запис у NDJSON.",
-  "тригер": {
+  "trigger": {
     "type": "http",
     "http": {
-      "шлях": "<WEBHOOK_PATH>",
-      "метод": "POST"
+      "path": "/webhooks/shopify/orders/create",
+      "method": "POST"
     }
   },
-  "виклик": {
-    "план": {
-      "версія": "3.3",
-      "дії": [
+  "invoke": {
+    "plan": {
+      "mova_version": "3.3",
+      "actions": [
         {
           "type": "отримати_секрет",
-          "name": "<WEBHOOK_SECRET_NAME>",
+          "name": "SHOPIFY_WEBHOOK_SECRET",
           "out": "vars.webhook_secret"
         },
         {
@@ -23,7 +23,7 @@
         },
         {
           "type": "file_append_jsonl",
-          "path": "<OUT_FILE>",
+          "path": "out/shopify_orders.ndjson",
           "value": "${payload}"
         },
         {

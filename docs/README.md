@@ -103,8 +103,11 @@ npm run validate:canonical     # Валідація канонічних фай�
 
 ### Підстановка
 ```bash
-npm run scaffold:shopify:orders  # Створити Shopify бланк
-npm run scaffold:jsonld:event    # Створити JSON-LD бланк
+npm run scaffold:shopify:orders     # Створити Shopify бланк
+npm run scaffold:jsonld:event       # Створити JSON-LD бланк
+npm run scaffold:webhook:shopify    # Створити Shopify webhook
+npm run scaffold:stripe:pi          # Створити Stripe Payment Intent
+npm run scaffold:sendgrid:mail      # Створити SendGrid email
 ```
 
 ## Бланки (Blank Templates)
@@ -118,6 +121,77 @@ node scripts/scaffold.mjs templates/blank/ua/envelope_min_blank.json templates/u
 ```bash
 node scripts/scaffold.mjs templates/blank/ua/shopify_orders_blank.json templates/ua/shopify_orders.json
 ```
+
+## Інтеграційні шаблони
+
+### ТЗ-01: Shopify Webhook orders/create
+
+**Мета:** Прийняти вебхук orders/create від Shopify з перевіркою HMAC та збереженням в NDJSON.
+
+**Як заповнити:**
+```bash
+npm run scaffold:webhook:shopify
+```
+
+**Що робить:**
+- Створює маршрут з HTTP POST тригером
+- Перевіряє HMAC підпис через `shopify_verify_webhook`
+- Зберігає payload в NDJSON файл через `file_append_jsonl`
+
+**Очікуваний результат:**
+```
+✅ OK orders/create 1234567890
+```
+
+**Типові помилки:**
+- `401 Unauthorized` - невірний HMAC підпис
+- `File not found` - відсутній секрет SHOPIFY_WEBHOOK_SECRET
+
+### ТЗ-02: Stripe Payment Intent
+
+**Мета:** Створити Payment Intent у Stripe через API з безпечним зберіганням ключа.
+
+**Як заповнити:**
+```bash
+npm run scaffold:stripe:pi
+```
+
+**Що робить:**
+- Отримує API ключ через `secrets.get`
+- Надсилає POST запит до Stripe API
+- Повертає ID створеного Payment Intent
+
+**Очікуваний результат:**
+```
+PaymentIntent: pi_xxxxxxxxxxxxxxxxxx
+```
+
+**Типові помилки:**
+- `Authentication failed` - невірний API ключ
+- `Invalid amount` - некоректна сума в мінорних одиницях
+
+### ТЗ-03: SendGrid Email
+
+**Мета:** Надіслати email через SendGrid API з правильним JSON тілом.
+
+**Як заповнити:**
+```bash
+npm run scaffold:sendgrid:mail
+```
+
+**Що робить:**
+- Отримує API ключ через `secrets.get`
+- Надсилає POST запит до SendGrid API
+- Підтримує HTML та plain text контент
+
+**Очікуваний результат:**
+```
+SendGrid accepted (status in vars.sg_resp.__status)
+```
+
+**Типові помилки:**
+- `401 Unauthorized` - невірний API ключ
+- `400 Bad Request` - невалідний email формат
 
 ## Розширення файлів
 

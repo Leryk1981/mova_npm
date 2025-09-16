@@ -15,13 +15,28 @@ if (!blankPath || !outputPath) {
   process.exit(1);
 }
 
-const blankFullPath = resolve(root, blankPath);
+let blankFullPath;
+if (blankPath.startsWith('/') || blankPath.startsWith('\\') || blankPath.includes(':\\')) {
+  // Абсолютний шлях
+  blankFullPath = blankPath;
+} else {
+  // Відносний шлях до root
+  blankFullPath = resolve(root, blankPath);
+}
+
 if (!existsSync(blankFullPath)) {
   console.error(`❌ Помилка: Файл бланка не знайдено: ${blankFullPath}`);
   process.exit(1);
 }
 
-const outputFullPath = resolve(root, outputPath);
+let outputFullPath;
+if (outputPath.startsWith('/') || outputPath.startsWith('\\') || outputPath.includes(':\\')) {
+  // Абсолютний шлях
+  outputFullPath = outputPath;
+} else {
+  // Відносний шлях до root
+  outputFullPath = resolve(root, outputPath);
+}
 const outputDir = dirname(outputFullPath);
 if (!existsSync(outputDir)) {
   mkdirSync(outputDir, { recursive: true });

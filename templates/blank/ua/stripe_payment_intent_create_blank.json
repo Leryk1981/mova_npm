@@ -1,0 +1,31 @@
+{
+  "версія": "3.3",
+  "$comment": "Stripe Payment Intent (create). Сума в мінорних одиницях.",
+  "дії": [
+    {
+      "type": "отримати_секрет",
+      "name": "<STRIPE_KEY_NAME>",
+      "out": "vars.sk"
+    },
+    {
+      "type": "http_fetch",
+      "method": "POST",
+      "url": "https://api.stripe.com/v1/payment_intents",
+      "headers": {
+        "Authorization": "Bearer ${vars.sk}",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "body": {
+        "amount": "<AMOUNT_MINOR>",
+        "currency": "<CURRENCY>",
+        "description": "<DESCRIPTION>"
+      },
+      "encode": "form",
+      "out": "vars.intent"
+    },
+    {
+      "type": "print",
+      "message": "PaymentIntent: ${vars.intent.id}"
+    }
+  ]
+}

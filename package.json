@@ -25,6 +25,13 @@
     "scaffold:shopify:orders": "node scripts/scaffold.mjs templates/blank/ua/shopify_orders_blank.json templates/ua/shopify_orders.json",
     "scaffold:jsonld:event": "node scripts/scaffold.mjs templates/blank/ua/envelope_jsonld_event_blank.json templates/ua/event.json",
 
+    "scaffold:webhook:shopify": "node scripts/scaffold.mjs templates/blank/ua/webhook_shopify_orders_create_route_blank.json templates/ua/webhook_shopify_orders_create_route.json WEBHOOK_PATH=/webhooks/shopify/orders/create WEBHOOK_SECRET_NAME=SHOPIFY_WEBHOOK_SECRET OUT_FILE=out/shopify_orders.ndjson",
+    "scaffold:stripe:pi": "node scripts/scaffold.mjs templates/blank/ua/stripe_payment_intent_create_blank.json templates/ua/stripe_payment_intent_create.json AMOUNT_MINOR=2500 CURRENCY=EUR DESCRIPTION='Test order' STRIPE_KEY_NAME=STRIPE_API_KEY",
+    "scaffold:sendgrid:mail": "node scripts/scaffold.mjs templates/blank/ua/sendgrid_send_mail_blank.json templates/ua/sendgrid_send_mail.json FROM_EMAIL=you@example.com TO_EMAILS=client@example.com SUBJECT='Hi' PLAIN_TEXT='Hello' HTML_CONTENT='<b>Hello</b>' SG_KEY_NAME=SENDGRID_API_KEY",
+
+    "ua:to:canonical": "node scripts/translation/translate.mjs templates/ua ua",
+    "validate:canonical": "node scripts/validation/validate_schemas.mjs",
+
     "start:ui": "node server.js",
     "run": "node scripts/runtime/run_plan.mjs",
     "cli": "node cli.mjs"

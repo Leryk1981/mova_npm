@@ -4,7 +4,7 @@
   "тригер": {
     "type": "http",
     "http": {
-      "шлях": "<WEBHOOK_PATH>",
+      "шлях": "/webhooks/shopify/orders/create",
       "метод": "POST"
     }
   },
@@ -14,7 +14,7 @@
       "дії": [
         {
           "type": "отримати_секрет",
-          "name": "<WEBHOOK_SECRET_NAME>",
+          "name": "SHOPIFY_WEBHOOK_SECRET",
           "out": "vars.webhook_secret"
         },
         {
@@ -23,7 +23,7 @@
         },
         {
           "type": "file_append_jsonl",
-          "path": "<OUT_FILE>",
+          "path": "out/shopify_orders.ndjson",
           "value": "${payload}"
         },
         {
