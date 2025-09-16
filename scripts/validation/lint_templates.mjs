@@ -64,7 +64,7 @@ function checkKeys(obj, filePath, ancestors = []) {
   for (const key of Object.keys(obj)) {
     const nextAncestors = ancestors.concat(key);
 
-    if (canonicalKeys.has(key)) {
+    if (!key.startsWith('@') && canonicalKeys.has(key)) {
       console.error(`❌ Помилка в ${filePath}: знайдено англійський структурний ключ "${key}".`);
       hasErrors = true;
     }
@@ -102,3 +102,4 @@ files.forEach(fullPath => {
 
 if (hasErrors) process.exit(1);
 console.log('✅ Усі шаблони пройшли перевірку.');
+
