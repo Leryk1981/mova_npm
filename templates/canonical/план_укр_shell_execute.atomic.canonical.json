@@ -1,0 +1,20 @@
+{
+  "mova_version": "3.3",
+  "id": "mova.shell_execute.atomic",
+  "description": "Atomic call for mova.shell_execute",
+  "policies": {
+    "timeout_ms": 10000,
+    "retry": {
+      "max_attempts": 1
+    }
+  },
+  "actions": [
+    {
+      "type": "emit_event",
+      "channel": "mova.shell_execute",
+      "payload": {
+        "command": "${command}"
+      }
+    }
+  ]
+}

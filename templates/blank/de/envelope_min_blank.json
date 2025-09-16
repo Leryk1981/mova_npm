@@ -1,0 +1,9 @@
+{
+  "version": "3.3",
+  "aktionen": [
+    {
+      "typ": "print",
+      "nachricht": "<IHRE_NACHRICHT>"
+    }
+  ]
+}

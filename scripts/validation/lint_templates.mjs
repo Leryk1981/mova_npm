@@ -25,6 +25,16 @@ if (!inputDirRelativePath) {
 
 const inputDirFullPath = resolve(root, inputDirRelativePath);
 
+// Визначаємо, чи це мовна директорія
+const isLanguageDir = inputDirRelativePath.includes('templates/ua') ||
+                      inputDirRelativePath.includes('templates/de') ||
+                      inputDirRelativePath.includes('templates/fr') ||
+                      inputDirRelativePath.includes('templates/pl') ||
+                      inputDirRelativePath === 'templates/ua' ||
+                      inputDirRelativePath === 'templates/de' ||
+                      inputDirRelativePath === 'templates/fr' ||
+                      inputDirRelativePath === 'templates/pl';
+
 function findJsonFiles(startPath) {
   let results = [];
   const files = readdirSync(startPath);
@@ -64,8 +74,8 @@ function checkKeys(obj, filePath, ancestors = []) {
   for (const key of Object.keys(obj)) {
     const nextAncestors = ancestors.concat(key);
 
-    if (!key.startsWith('@') && canonicalKeys.has(key)) {
-      console.error(`❌ Помилка в ${filePath}: знайдено англійський структурний ключ "${key}".`);
+    if (isLanguageDir && !key.startsWith('@') && canonicalKeys.has(key) && !currentAllowlist.has(key)) {
+      console.error(`❌ Помилка в ${filePath}: знайдено заборонений англійський структурний ключ "${key}".`);
       hasErrors = true;
     }
 
@@ -82,6 +92,21 @@ function checkKeys(obj, filePath, ancestors = []) {
 }
 
 console.log(`--- Лінтер шаблонів у ${inputDirRelativePath} ---`);
+console.log(`Is language dir: ${isLanguageDir}`);
+
+// Завантажуємо allowlist для поточної мови
+let currentAllowlist = new Set();
+if (isLanguageDir) {
+  const lang = inputDirRelativePath.split('/').pop() || inputDirRelativePath.split('\\').pop();
+  const allowlistPath = resolve(root, `allowlist_structural${lang === 'ua' ? '' : '_' + lang}.json`);
+  console.log(`Loading allowlist for lang ${lang}: ${allowlistPath}`);
+  if (existsSync(allowlistPath)) {
+    currentAllowlist = new Set(JSON.parse(readFileSync(allowlistPath, 'utf8')));
+    console.log(`Loaded ${currentAllowlist.size} keys from allowlist`);
+  } else {
+    console.log(`Allowlist file not found: ${allowlistPath}`);
+  }
+}
 files.forEach(fullPath => {
   const filePath = relative(root, fullPath);
   const fileContent = readFileSync(fullPath, 'utf-8');

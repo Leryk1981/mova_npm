@@ -46,6 +46,7 @@
     <h1>MOVA: Інтегроване середовище розробки</h1>
     <div class="tabs">
         <div class="tab active" data-tab="editor">Редактор</div>
+        <div class="tab" data-tab="blanks">Бланки</div>
         <div class="tab" data-tab="vnl">VNL Парсер</div>
         <div class="tab" data-tab="runner">Виконавець планів</div>
         <div class="tab" data-tab="validation">Валідація</div>
@@ -56,19 +57,63 @@
     <!-- Вкладка Редактор -->
     <div id="editor-tab" class="container">
         <div class="panel file-browser-panel">
-            <h2>Шаблони (templates/ua)</h2>
+            <h2>Шаблони</h2>
+            <div class="form-group">
+                <label for="language-select">Мова:</label>
+                <select id="language-select">
+                    <option value="ua">Українська (UA)</option>
+                    <option value="de">Німецька (DE)</option>
+                    <option value="fr">Французька (FR)</option>
+                    <option value="pl">Польська (PL)</option>
+                </select>
+            </div>
             <ul id="file-list"></ul>
         </div>
         <div class="panel">
             <div class="panel-header">
-                <h2>Український шаблон (вхід)</h2>
-                <button id="save-button" disabled>Зберегти</button>
+                <h2 id="input-language-title">Український шаблон (вхід)</h2>
+                <div class="btn-group">
+                    <button id="save-button" disabled>Зберегти</button>
+                    <button id="translate-button" class="success">Перекласти</button>
+                </div>
             </div>
-            <textarea id="uk-input" placeholder="Виберіть файл ліворуч або вставте JSON..."></textarea>
+            <textarea id="lang-input" placeholder="Виберіть файл ліворуч або вставте JSON..."></textarea>
         </div>
         <div class="panel">
             <h2>Канонічний JSON (вихід)</h2>
-            <textarea id="en-output" readonly placeholder="Результат трансляції..."></textarea>
+            <textarea id="canonical-output" readonly placeholder="Результат трансляції..."></textarea>
+        </div>
+    </div>
+
+    <!-- Вкладка Бланки -->
+    <div id="blanks-tab" class="container hidden">
+        <div class="panel file-browser-panel">
+            <h2>Бланки</h2>
+            <div class="form-group">
+                <label for="blank-language-select">Мова:</label>
+                <select id="blank-language-select">
+                    <option value="ua">Українська (UA)</option>
+                    <option value="de">Німецька (DE)</option>
+                    <option value="fr">Французька (FR)</option>
+                    <option value="pl">Польська (PL)</option>
+                </select>
+            </div>
+            <ul id="blank-list"></ul>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <h2 id="blank-title">Бланк</h2>
+                <button id="load-blank-button" class="success">Завантажити</button>
+            </div>
+            <textarea id="blank-content" readonly placeholder="Виберіть бланк ліворуч..."></textarea>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Підстановка значень</h2>
+                <button id="scaffold-button" class="success">Створити шаблон</button>
+            </div>
+            <div id="scaffold-params"></div>
+            <textarea id="scaffold-result" placeholder="Результат підстановки..."></textarea>
         </div>
     </div>
 
@@ -158,19 +203,43 @@
         <div class="panel">
             <h2>Команди збірки</h2>
             <div class="form-group">
-                <button id="build-all-btn" class="success">Повна збірка</button>
+                <button id="build-all-btn" class="success">Повна збірка (всі мови)</button>
             </div>
             <div class="form-group">
-                <button id="translate-btn">Переклад на англійський</button>
-            </div>
-            <div class="form-group">
-                <button id="validate-all-btn">Валідувати все</button>
-            </div>
-            <div class="form-group">
-                <button id="build-manifest-btn">Зібрати маніфест</button>
+                <button id="build-keys-btn">Зібрати ключі</button>
             </div>
             <div class="form-group">
                 <button id="check-lexicon-btn">Перевірити лексикон</button>
+            </div>
+            <h3>Трансляція</h3>
+            <div class="form-group">
+                <button id="translate-ua-btn">Перекласти UA</button>
+            </div>
+            <div class="form-group">
+                <button id="translate-de-btn">Перекласти DE</button>
+            </div>
+            <div class="form-group">
+                <button id="translate-fr-btn">Перекласти FR</button>
+            </div>
+            <div class="form-group">
+                <button id="translate-pl-btn">Перекласти PL</button>
+            </div>
+            <h3>Лінтинг</h3>
+            <div class="form-group">
+                <button id="lint-ua-btn">Лінт UA</button>
+            </div>
+            <div class="form-group">
+                <button id="lint-de-btn">Лінт DE</button>
+            </div>
+            <div class="form-group">
+                <button id="lint-fr-btn">Лінт FR</button>
+            </div>
+            <div class="form-group">
+                <button id="lint-pl-btn">Лінт PL</button>
+            </div>
+            <h3>Валідація</h3>
+            <div class="form-group">
+                <button id="validate-canonical-btn">Валідувати канонічні</button>
             </div>
         </div>
         <div class="panel">

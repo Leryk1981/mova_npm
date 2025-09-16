@@ -4,24 +4,30 @@
   "description": "UA JSON Language for MOVA",
   "type": "module",
   "scripts": {
-    "translate": "node scripts/translation/uk_to_en.mjs templates/ua",
+    "build:keys": "node scripts/build/build_keys.mjs",
+    "check:lexicon": "node scripts/validation/check_lexicon_coverage.mjs",
+
+    "lint:ua": "node scripts/validation/lint_templates.mjs templates/ua && node scripts/validation/no_placeholders.mjs templates/ua",
+    "lint:de": "node scripts/validation/lint_templates.mjs templates/de && node scripts/validation/no_placeholders.mjs templates/de",
+    "lint:fr": "node scripts/validation/lint_templates.mjs templates/fr && node scripts/validation/no_placeholders.mjs templates/fr",
+    "lint:pl": "node scripts/validation/lint_templates.mjs templates/pl && node scripts/validation/no_placeholders.mjs templates/pl",
+
+    "translate:ua": "node scripts/translation/translate.mjs templates/ua --lang=uk",
+    "translate:de": "node scripts/translation/translate.mjs templates/de --lang=de",
+    "translate:fr": "node scripts/translation/translate.mjs templates/fr --lang=fr",
+    "translate:pl": "node scripts/translation/translate.mjs templates/pl --lang=pl",
+
+    "validate:canonical": "node scripts/validation/validate_schemas.mjs templates/canonical",
+
+    "build:all": "npm run build:keys && npm run check:lexicon && npm run lint:ua && npm run lint:de && npm run lint:fr && npm run lint:pl && npm run translate:ua && npm run translate:de && npm run translate:fr && npm run translate:pl && npm run validate:canonical",
+    "build:all:with-de": "npm run build:keys && npm run check:lexicon && npm run lint:ua && npm run lint:de && npm run lint:fr && npm run lint:pl && npm run translate:ua && npm run translate:de && npm run translate:fr && npm run translate:pl && npm run validate:canonical",
+
+    "scaffold:shopify:orders": "node scripts/scaffold.mjs templates/blank/ua/shopify_orders_blank.json templates/ua/shopify_orders.json",
+    "scaffold:jsonld:event": "node scripts/scaffold.mjs templates/blank/ua/envelope_jsonld_event_blank.json templates/ua/event.json",
+
     "start:ui": "node server.js",
-    "translate:en-ua": "node scripts/translation/en_to_uk.mjs",
-    "validate": "node scripts/validation/validate_schemas.mjs",
-    "build": "npm run build:keys && npm run build:ua && npm run build:manifest && npm run check:lexicon",
     "run": "node scripts/runtime/run_plan.mjs",
-    "run:plan": "npm run build:ua && npm run build:manifest && npm run run -- canonical/plan_min.json",
-    "build:manifest": "node scripts/build/build_manifest.mjs > canonical/manifest.json",
-    "build:keys": "node scripts/build/build_keys.mjs > build/canonical_keys.json",
-    "lint:templates": "node scripts/validation/lint_templates.mjs templates/ua",
-    "check:lexicon": "npm run build:keys && node scripts/validation/check_lexicon_coverage.mjs",
-    "build:ua": "npm run lint:templates && npm run translate && npm run validate",
-    "build:uk-schema": "node scripts/build/build_uk_schema.mjs",
-    "build:fingerprint": "node scripts/build/build_schema_fingerprint.mjs",
-    "cli": "node cli.mjs",
-    "setup:dirs": "node scripts/setup_dirs.mjs",
-    "ua:jsonld:demo": "node scripts/translation/uk_to_en.mjs templates/ua/envelope_jsonld_min.json templates/canonical/envelope_jsonld_min.canonical.json",
-    "smoke:jsonld": "npm run ua:jsonld:demo && npm run validate"
+    "cli": "node cli.mjs"
   },
   "author": "",
   "license": "MIT",

@@ -1,0 +1,20 @@
+{
+  "mova_version": "3.3",
+  "id": "mova.browser_navigate.atomic",
+  "description": "Atomic call for mova.browser_navigate",
+  "policies": {
+    "timeout_ms": 10000,
+    "retry": {
+      "max_attempts": 1
+    }
+  },
+  "actions": [
+    {
+      "type": "emit_event",
+      "channel": "mova.browser_navigate",
+      "payload": {
+        "url": "${url}"
+      }
+    }
+  ]
+}

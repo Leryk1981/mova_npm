@@ -1,0 +1,32 @@
+{
+  "версія": "3.3",
+  "дії": [
+    {
+      "тип": "http_request",
+      "метод": "POST",
+      "шлях": "https://<SHOP_DOMAIN>/admin/api/2023-10/products.json",
+      "заголовки": {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": "<ACCESS_TOKEN>"
+      },
+      "тіло": {
+        "product": {
+          "title": "<PRODUCT_TITLE>",
+          "body_html": "<PRODUCT_DESCRIPTION>",
+          "vendor": "<VENDOR_NAME>",
+          "product_type": "<PRODUCT_TYPE>",
+          "variants": [
+            {
+              "price": "<PRICE>",
+              "sku": "<SKU>"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "тип": "print",
+      "повідомлення": "Продукт створено: <PRODUCT_TITLE>"
+    }
+  ]
+}

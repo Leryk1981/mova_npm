@@ -1,0 +1,9 @@
+{
+  "wersja": "3.3",
+  "akcje": [
+    {
+      "typ": "drukować",
+      "wiadomość": "Witaj MOVA!"
+    }
+  ]
+}

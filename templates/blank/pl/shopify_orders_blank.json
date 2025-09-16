@@ -1,0 +1,20 @@
+{
+  "wersja": "3.3",
+  "wyzwalacz": {
+    "http": {
+      "ścieżka": "/webhooks/orders/create",
+      "metoda": "POST"
+    }
+  },
+  "akcje": [
+    {
+      "typ": "drukować",
+      "wiadomość": "Otrzymano zamówienie z Shopify: <ORDER_ID>"
+    },
+    {
+      "typ": "ustawić_zmienną",
+      "zmienna": "order_data",
+      "wartość": "<PAYLOAD>"
+    }
+  ]
+}

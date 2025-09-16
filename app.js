@@ -3,8 +3,9 @@
 
 class MOVAUI {
     constructor() {
-        this.lexicon = null;
-        this.allowlist = null;
+        this.lexicons = {};
+        this.allowlists = {};
+        this.currentLanguage = 'ua';
         this.activeTab = 'editor';
         this.activeFile = null;
         this.executionProcess = null;
@@ -14,6 +15,7 @@ class MOVAUI {
         await this.loadResources();
         this.setupTabs();
         this.setupEditor();
+        this.setupBlanksManager();
         this.setupVNLParser();
         this.setupPlanRunner();
         this.setupValidation();
@@ -22,18 +24,30 @@ class MOVAUI {
     }
 
     async loadResources() {
+        const languages = ['ua', 'de', 'fr', 'pl'];
+
         try {
-            const [lexiconRes, allowlistRes] = await Promise.all([
-                fetch('/lexicon_uk.json'),
-                fetch('/allowlist_structural.json')
+            const loadPromises = languages.flatMap(lang => [
+                fetch(`/lexicon_${lang}.json`).then(res => res.json()).then(data => {
+                    this.lexicons[lang] = data;
+                }).catch(() => {
+                    console.warn(`Не вдалося завантажити lexicon_${lang}.json`);
+                    this.lexicons[lang] = {};
+                }),
+                fetch(`/allowlist_structural${lang === 'ua' ? '' : '_' + lang}.json`)
+                    .then(res => res.json())
+                    .then(data => {
+                        this.allowlists[lang] = new Set(data);
+                    }).catch(() => {
+                        console.warn(`Не вдалося завантажити allowlist для ${lang}`);
+                        this.allowlists[lang] = new Set();
+                    })
             ]);
 
-            if (!lexiconRes.ok) throw new Error('Не вдалося завантажити lexicon_uk.json');
-            if (!allowlistRes.ok) throw new Error('Не вдалося завантажити allowlist_structural.json');
+            await Promise.all(loadPromises);
 
-            this.lexicon = await lexiconRes.json();
-            const allowlistArray = await allowlistRes.json();
-            this.allowlist = new Set(allowlistArray);
+            // Встановлюємо поточну мову
+            this.currentLanguage = 'ua';
 
         } catch (error) {
             console.error("Помилка завантаження словників:", error);
@@ -71,25 +85,50 @@ class MOVAUI {
 
     // === EDITOR TAB ===
     setupEditor() {
-        const ukInput = document.getElementById('uk-input');
-        const enOutput = document.getElementById('en-output');
+        const langInput = document.getElementById('lang-input');
+        const canonicalOutput = document.getElementById('canonical-output');
         const saveButton = document.getElementById('save-button');
+        const translateButton = document.getElementById('translate-button');
         const fileListElement = document.getElementById('file-list');
+        const languageSelect = document.getElementById('language-select');
+        const inputLanguageTitle = document.getElementById('input-language-title');
+
+        const languageNames = {
+            'ua': 'Український',
+            'de': 'Німецький',
+            'fr': 'Французький',
+            'pl': 'Польський'
+        };
 
         const handleTranslation = () => {
-            const ukJsonText = ukInput.value;
-            if (ukJsonText.trim() === '') {
-                enOutput.value = '';
+            const langJsonText = langInput.value;
+            if (langJsonText.trim() === '') {
+                canonicalOutput.value = '';
                 return;
             }
 
             try {
-                const ukJson = JSON.parse(ukJsonText);
-                const enJson = this.translateObject(ukJson);
-                enOutput.value = JSON.stringify(enJson, null, 2);
+                const langJson = JSON.parse(langJsonText);
+                const canonicalJson = this.translateObject(langJson, this.currentLanguage);
+                canonicalOutput.value = JSON.stringify(canonicalJson, null, 2);
             } catch (error) {
-                enOutput.value = `Помилка парсингу або трансляції:\n${error.message}`;
+                canonicalOutput.value = `Помилка парсингу або трансляції:\n${error.message}`;
             }
+        };
+
+        const handleLanguageChange = () => {
+            this.currentLanguage = languageSelect.value;
+            inputLanguageTitle.textContent = `${languageNames[this.currentLanguage]} шаблон (вхід)`;
+
+            // Оновлюємо список файлів
+            this.loadFileList(fileListElement, `templates/${this.currentLanguage}`, (filename) => {
+                this.loadFile(filename, langInput, fileListElement, `templates/${this.currentLanguage}`);
+            });
+
+            // Очищаємо активний файл
+            this.activeFile = null;
+            saveButton.disabled = true;
+            fileListElement.querySelectorAll('li.active').forEach(li => li.classList.remove('active'));
         };
 
         const saveFile = async () => {
@@ -107,7 +146,8 @@ class MOVAUI {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         filename: this.activeFile,
-                        content: ukInput.value,
+                        content: langInput.value,
+                        language: this.currentLanguage
                     }),
                 });
 
@@ -128,16 +168,53 @@ class MOVAUI {
             }
         };
 
-        ukInput.addEventListener('input', handleTranslation);
-        saveButton.addEventListener('click', saveFile);
+        const translateFile = async () => {
+            if (!this.activeFile) {
+                alert('Немає активного файлу для перекладу.');
+                return;
+            }
 
-        // Load file list
-        this.loadFileList(fileListElement, 'templates/ua', (filename) => {
-            this.loadFile(filename, ukInput, fileListElement, 'uk-input');
-        });
+            translateButton.disabled = true;
+            translateButton.textContent = 'Переклад...';
+
+            try {
+                const response = await fetch('/api/translate-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: this.activeFile,
+                        language: this.currentLanguage
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Невідома помилка сервера');
+                }
+
+                canonicalOutput.value = JSON.stringify(result.canonical, null, 2);
+                alert('Файл успішно перекладено!');
+
+            } catch (error) {
+                console.error('Помилка перекладу:', error);
+                alert(`Не вдалося перекласти файл: ${error.message}`);
+            } finally {
+                translateButton.disabled = false;
+                translateButton.textContent = 'Перекласти';
+            }
+        };
+
+        langInput.addEventListener('input', handleTranslation);
+        languageSelect.addEventListener('change', handleLanguageChange);
+        saveButton.addEventListener('click', saveFile);
+        translateButton.addEventListener('click', translateFile);
+
+        // Завантажуємо початковий список файлів
+        handleLanguageChange();
 
         // Handle paste
-        ukInput.addEventListener('paste', () => {
+        langInput.addEventListener('paste', () => {
             setTimeout(() => {
                 this.activeFile = null;
                 saveButton.disabled = true;
@@ -145,6 +222,153 @@ class MOVAUI {
                 handleTranslation();
             }, 0);
         });
+    }
+
+    // === BLANKS TAB ===
+    setupBlanksManager() {
+        const blankList = document.getElementById('blank-list');
+        const blankContent = document.getElementById('blank-content');
+        const loadBlankButton = document.getElementById('load-blank-button');
+        const scaffoldButton = document.getElementById('scaffold-button');
+        const scaffoldParams = document.getElementById('scaffold-params');
+        const scaffoldResult = document.getElementById('scaffold-result');
+        const blankLanguageSelect = document.getElementById('blank-language-select');
+        const blankTitle = document.getElementById('blank-title');
+
+        let currentBlank = null;
+        let currentBlankLanguage = 'ua';
+
+        const languageNames = {
+            'ua': 'Український',
+            'de': 'Німецький',
+            'fr': 'Французький',
+            'pl': 'Польський'
+        };
+
+        const handleBlankLanguageChange = () => {
+            currentBlankLanguage = blankLanguageSelect.value;
+            blankTitle.textContent = `${languageNames[currentBlankLanguage]} бланк`;
+
+            // Оновлюємо список бланків
+            this.loadFileList(blankList, `templates/blank/${currentBlankLanguage}`, (filename) => {
+                this.loadBlank(filename);
+            });
+
+            // Очищаємо активний бланк
+            currentBlank = null;
+            blankContent.value = '';
+            scaffoldParams.innerHTML = '';
+            scaffoldResult.value = '';
+        };
+
+        const loadBlank = async (filename) => {
+            try {
+                const response = await fetch(`/templates/blank/${currentBlankLanguage}/${filename}`);
+                if (!response.ok) throw new Error(`Не вдалося завантажити бланк ${filename}`);
+
+                const content = await response.text();
+                blankContent.value = content;
+                currentBlank = filename;
+
+                blankList.querySelectorAll('li').forEach(li => {
+                    li.classList.toggle('active', li.dataset.filename === filename);
+                });
+
+                // Парсимо плейсхолдери для форми підстановки
+                this.parsePlaceholders(content);
+
+            } catch (error) {
+                console.error('Помилка завантаження бланка:', error);
+                alert(`Помилка завантаження бланка: ${error.message}`);
+            }
+        };
+
+        const parsePlaceholders = (content) => {
+            const placeholderRegex = /<([^>]+)>/g;
+            const placeholders = [];
+            let match;
+
+            while ((match = placeholderRegex.exec(content)) !== null) {
+                placeholders.push(match[1]);
+            }
+
+            scaffoldParams.innerHTML = '';
+
+            if (placeholders.length > 0) {
+                placeholders.forEach(placeholder => {
+                    const div = document.createElement('div');
+                    div.className = 'form-group';
+                    div.innerHTML = `
+                        <label for="param-${placeholder}">${placeholder}:</label>
+                        <input type="text" id="param-${placeholder}" placeholder="Введіть значення для ${placeholder}">
+                    `;
+                    scaffoldParams.appendChild(div);
+                });
+            }
+        };
+
+        const scaffoldBlank = async () => {
+            if (!currentBlank) {
+                alert('Виберіть бланк для підстановки.');
+                return;
+            }
+
+            const params = {};
+            scaffoldParams.querySelectorAll('input').forEach(input => {
+                const key = input.id.replace('param-', '');
+                const value = input.value.trim();
+                if (value) {
+                    params[key] = value;
+                }
+            });
+
+            if (Object.keys(params).length === 0) {
+                alert('Введіть хоча б одне значення для підстановки.');
+                return;
+            }
+
+            scaffoldButton.disabled = true;
+            scaffoldButton.textContent = 'Обробка...';
+
+            try {
+                const response = await fetch('/api/scaffold', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        blankPath: `templates/blank/${currentBlankLanguage}/${currentBlank}`,
+                        outputPath: `templates/${currentBlankLanguage}/${currentBlank.replace('_blank', '_filled')}`,
+                        params: params
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Невідома помилка сервера');
+                }
+
+                scaffoldResult.value = JSON.stringify(result.content, null, 2);
+                alert('Бланк успішно оброблено!');
+
+            } catch (error) {
+                console.error('Помилка обробки бланка:', error);
+                alert(`Не вдалося обробити бланк: ${error.message}`);
+            } finally {
+                scaffoldButton.disabled = false;
+                scaffoldButton.textContent = 'Створити шаблон';
+            }
+        };
+
+        blankLanguageSelect.addEventListener('change', handleBlankLanguageChange);
+        loadBlankButton.addEventListener('click', () => {
+            if (currentBlank) {
+                loadBlank(currentBlank);
+            }
+        });
+        scaffoldButton.addEventListener('click', scaffoldBlank);
+
+        // Завантажуємо початковий список бланків
+        handleBlankLanguageChange();
     }
 
     // === VNL PARSER TAB ===
@@ -306,15 +530,28 @@ class MOVAUI {
         const reloadBtn = document.getElementById('reload-lexicon-btn');
         const saveBtn = document.getElementById('save-lexicon-btn');
 
-        const loadLexicon = async () => {
+        let currentLexiconLang = 'uk';
+
+        const loadLexicon = async (lang = currentLexiconLang) => {
             try {
                 const [lexRes, allowRes] = await Promise.all([
-                    fetch('/lexicon_uk.json'),
-                    fetch('/allowlist_structural.json')
+                    fetch(`/lexicon_${lang}.json`),
+                    fetch(`/allowlist_structural${lang === 'ua' ? '' : '_' + lang}.json`)
                 ]);
 
-                lexiconArea.value = JSON.stringify(await lexRes.json(), null, 2);
-                allowlistArea.value = JSON.stringify(await allowRes.json(), null, 2);
+                if (lexRes.ok) {
+                    const lexiconData = await lexRes.json();
+                    lexiconArea.value = JSON.stringify(lexiconData, null, 2);
+                } else {
+                    lexiconArea.value = `Не вдалося завантажити lexicon_${lang}.json`;
+                }
+
+                if (allowRes.ok) {
+                    const allowlistData = await allowRes.json();
+                    allowlistArea.value = JSON.stringify(allowlistData, null, 2);
+                } else {
+                    allowlistArea.value = `Не вдалося завантажити allowlist для ${lang}`;
+                }
 
             } catch (error) {
                 console.error('Помилка завантаження лексикону:', error);
@@ -322,7 +559,7 @@ class MOVAUI {
             }
         };
 
-        reloadBtn.addEventListener('click', loadLexicon);
+        reloadBtn.addEventListener('click', () => loadLexicon());
         saveBtn.addEventListener('click', async () => {
             try {
                 const lexiconData = JSON.parse(lexiconArea.value);
@@ -342,10 +579,24 @@ class MOVAUI {
     // === BUILD TAB ===
     setupBuildSystem() {
         const buildAllBtn = document.getElementById('build-all-btn');
-        const translateBtn = document.getElementById('translate-btn');
-        const validateAllBtn = document.getElementById('validate-all-btn');
-        const buildManifestBtn = document.getElementById('build-manifest-btn');
+        const buildKeysBtn = document.getElementById('build-keys-btn');
         const checkLexiconBtn = document.getElementById('check-lexicon-btn');
+
+        // Трансляція
+        const translateUaBtn = document.getElementById('translate-ua-btn');
+        const translateDeBtn = document.getElementById('translate-de-btn');
+        const translateFrBtn = document.getElementById('translate-fr-btn');
+        const translatePlBtn = document.getElementById('translate-pl-btn');
+
+        // Лінтинг
+        const lintUaBtn = document.getElementById('lint-ua-btn');
+        const lintDeBtn = document.getElementById('lint-de-btn');
+        const lintFrBtn = document.getElementById('lint-fr-btn');
+        const lintPlBtn = document.getElementById('lint-pl-btn');
+
+        // Валідація
+        const validateCanonicalBtn = document.getElementById('validate-canonical-btn');
+
         const buildLog = document.getElementById('build-log');
         const buildStatus = document.getElementById('build-status');
 
@@ -379,26 +630,43 @@ class MOVAUI {
             }
         };
 
-        buildAllBtn.addEventListener('click', () => runCommand('npm run build', 'Повна збірка'));
-        translateBtn.addEventListener('click', () => runCommand('npm run translate', 'Переклад на англійський'));
-        validateAllBtn.addEventListener('click', () => runCommand('npm run validate', 'Валідація всіх файлів'));
-        buildManifestBtn.addEventListener('click', () => runCommand('npm run build:manifest', 'Збірка маніфесту'));
+        // Основні команди
+        buildAllBtn.addEventListener('click', () => runCommand('npm run build:all', 'Повна збірка (всі мови)'));
+        buildKeysBtn.addEventListener('click', () => runCommand('npm run build:keys', 'Збірка ключів'));
         checkLexiconBtn.addEventListener('click', () => runCommand('npm run check:lexicon', 'Перевірка лексикону'));
+
+        // Трансляція
+        translateUaBtn.addEventListener('click', () => runCommand('npm run translate:ua', 'Переклад UA'));
+        translateDeBtn.addEventListener('click', () => runCommand('npm run translate:de', 'Переклад DE'));
+        translateFrBtn.addEventListener('click', () => runCommand('npm run translate:fr', 'Переклад FR'));
+        translatePlBtn.addEventListener('click', () => runCommand('npm run translate:pl', 'Переклад PL'));
+
+        // Лінтинг
+        lintUaBtn.addEventListener('click', () => runCommand('npm run lint:ua', 'Лінт UA'));
+        lintDeBtn.addEventListener('click', () => runCommand('npm run lint:de', 'Лінт DE'));
+        lintFrBtn.addEventListener('click', () => runCommand('npm run lint:fr', 'Лінт FR'));
+        lintPlBtn.addEventListener('click', () => runCommand('npm run lint:pl', 'Лінт PL'));
+
+        // Валідація
+        validateCanonicalBtn.addEventListener('click', () => runCommand('npm run validate:canonical', 'Валідація канонічних файлів'));
     }
 
     // === UTILITY METHODS ===
-    translateObject(obj) {
+    translateObject(obj, language = this.currentLanguage) {
         if (Array.isArray(obj)) {
-            return obj.map(item => this.translateObject(item));
+            return obj.map(item => this.translateObject(item, language));
         }
         if (obj !== null && typeof obj === 'object') {
             const newObj = {};
-            for (const key in obj) {
-                const translatedKey = this.allowlist.has(key) ? (this.lexicon[key] || key) : key;
-                let value = this.translateObject(obj[key]);
+            const lexicon = this.lexicons[language] || {};
+            const allowlist = this.allowlists[language] || new Set();
 
-                if (translatedKey === 'type' && typeof value === 'string') {
-                    value = this.lexicon[value] || value;
+            for (const key in obj) {
+                const translatedKey = allowlist.has(key) ? (lexicon[key] || key) : key;
+                let value = this.translateObject(obj[key], language);
+
+                if (translatedKey === 'type' && typeof value === 'string' && allowlist.has(value)) {
+                    value = lexicon[value] || value;
                 }
 
                 newObj[translatedKey] = value;
@@ -442,6 +710,14 @@ class MOVAUI {
             listElement.querySelectorAll('li').forEach(li => {
                 li.classList.toggle('active', li.dataset.filename === filename);
             });
+
+            // Автоматично перекладаємо, якщо це редактор
+            if (textarea.id === 'lang-input') {
+                setTimeout(() => {
+                    const event = new Event('input');
+                    textarea.dispatchEvent(event);
+                }, 100);
+            }
 
         } catch (error) {
             console.error('Помилка завантаження файлу:', error);

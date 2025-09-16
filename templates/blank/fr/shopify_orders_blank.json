@@ -1,0 +1,20 @@
+{
+  "version": "3.3",
+  "déclencheur": {
+    "http": {
+      "chemin": "/webhooks/orders/create",
+      "méthode": "POST"
+    }
+  },
+  "actions": [
+    {
+      "type": "imprimer",
+      "message": "Commande reçue de Shopify: <ORDER_ID>"
+    },
+    {
+      "type": "définir_variable",
+      "variable": "order_data",
+      "valeur": "<PAYLOAD>"
+    }
+  ]
+}
