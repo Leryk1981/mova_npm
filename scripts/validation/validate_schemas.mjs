@@ -125,9 +125,9 @@ for (const { label, dir } of canonicalDirs) {
       if (fileName === 'manifest.json') continue; // Ignore the manifest file
 
       let schemaName;
-      if (fileName.includes('route')) {
+      if (fileName.includes('route') || fileName.includes('маршрут')) {
         schemaName = 'core/route.1.0.schema.json';
-      } else if (fileName.includes('plan') || fileName.includes('envelope')) {
+      } else if (fileName.includes('plan') || fileName.includes('envelope') || fileName.includes('план')) {
         schemaName = 'core/envelope.3.3.schema.json';
       }
 

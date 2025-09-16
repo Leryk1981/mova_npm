@@ -143,11 +143,20 @@ filesToProcess.forEach(inputPath => {
     if (explicitOutputPath) {
       outputFullPath = explicitOutputPath;
     } else {
-      const outputFilename = basename(inputPath)
+      let outputFilename = basename(inputPath)
         .replace(`_план_${lang}`, '_plan')
         .replace(`_маршрут_${lang}`, '_route')
         .replace(`_${lang}`, '')
         .replace('.json', '.canonical.json');
+
+      // Для украинского языка дополнительно заменяем украинские префиксы
+      if (lang === 'uk') {
+        outputFilename = outputFilename
+          .replace(/^план_укр_/, 'plan_')
+          .replace(/^маршрут_укр_/, 'route_')
+          .replace(/_укр_/, '_')
+          .replace(/план_/, 'plan_');
+      }
       outputFullPath = join(outputDir, outputFilename);
     }
 
