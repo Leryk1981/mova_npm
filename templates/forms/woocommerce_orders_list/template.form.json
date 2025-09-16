@@ -1,0 +1,202 @@
+{
+  "id": "woocommerce_orders_list",
+  "i18n": {
+    "title": {
+      "uk": "Отримати замовлення з WooCommerce"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      },
+      "security": {
+        "uk": "Безпека"
+      }
+    },
+    "fields": {
+      "BASE_URL": {
+        "uk": "Базовий URL магазину"
+      },
+      "STATUS": {
+        "uk": "Статус замовлень"
+      },
+      "AFTER_ISO": {
+        "uk": "Після дати (ISO)"
+      },
+      "OUT_FILE": {
+        "uk": "Файл для виводу"
+      },
+      "CK_SECRET_NAME": {
+        "uk": "Alias Consumer Key"
+      },
+      "CS_SECRET_NAME": {
+        "uk": "Alias Consumer Secret"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "BASE_URL",
+          "type": "url",
+          "required": true,
+          "sample": "https://store.example.com"
+        },
+        {
+          "key": "STATUS",
+          "type": "text",
+          "required": false,
+          "default": "any"
+        },
+        {
+          "key": "AFTER_ISO",
+          "type": "text",
+          "required": false,
+          "default": "2024-01-01T00:00:00Z"
+        },
+        {
+          "key": "OUT_FILE",
+          "type": "text",
+          "required": false,
+          "default": "out/wc_orders.ndjson"
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "fields": [
+        {
+          "key": "CK_SECRET_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "WC_CONSUMER_KEY"
+        },
+        {
+          "key": "CS_SECRET_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "WC_CONSUMER_SECRET"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "$comment": "WooCommerce: отримання замовлень із пагінацією, запис у NDJSON.",
+    "actions": [
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "vars.ck"
+      },
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "vars.cs"
+      },
+      {
+        "type": "set",
+        "invoke": "context:set",
+        "payload": {
+          "variable": "woocommerce_base_url",
+          "value": ""
+        }
+      },
+      {
+        "type": "set",
+        "invoke": "context:set",
+        "payload": {
+          "variable": "vars.page",
+          "value": 1
+        }
+      },
+      {
+        "type": "http_request",
+        "invoke": "http:request",
+        "payload": {
+          "url": "{+woocommerce_base_url}/wp-json/wc/v3/orders",
+          "method": "GET",
+          "headers": {
+            "Authorization": "Basic ${base64.encode(vars.ck + ':' + vars.cs)}"
+          },
+          "query": {
+            "per_page": 100,
+            "page": "${vars.page}",
+            "status": "",
+            "after": ""
+          },
+          "result_in": "vars.page_data"
+        }
+      },
+      {
+        "type": "if",
+        "when": "${Array.isArray(vars.page_data) && vars.page_data.length > 0}",
+        "then": [
+          {
+            "type": "set",
+            "invoke": "context:set",
+            "payload": {
+              "variable": "vars.current_order",
+              "value": "${vars.page_data[0]}"
+            }
+          },
+          {
+            "type": "file_write",
+            "path": "",
+            "data": "${vars.current_order}"
+          },
+          {
+            "type": "set",
+            "invoke": "context:set",
+            "payload": {
+              "variable": "vars.page",
+              "value": "${vars.page + 1}"
+            }
+          }
+        ],
+        "else": [
+          {
+            "type": "return",
+            "invoke": "flow:return",
+            "payload": {
+              "value": "done"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "CK_SECRET_NAME",
+      "to": "/actions/0/name",
+      "severity": "error"
+    },
+    {
+      "from": "CS_SECRET_NAME",
+      "to": "/actions/1/name",
+      "severity": "error"
+    },
+    {
+      "from": "BASE_URL",
+      "to": "/actions/2/payload/value",
+      "severity": "error"
+    },
+    {
+      "from": "STATUS",
+      "to": "/actions/4/payload/query/status",
+      "severity": "warn"
+    },
+    {
+      "from": "AFTER_ISO",
+      "to": "/actions/4/payload/query/after",
+      "severity": "warn"
+    },
+    {
+      "from": "OUT_FILE",
+      "to": "/actions/5/then/1/path",
+      "severity": "warn"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "версія": "3.3",
+  "id": "mova.browser_click.atomic",
+  "опис": "Atomic call for mova.browser_click",
+  "політики": {
+    "таймаут_мс": 10000,
+    "повтор": {
+      "max_attempts": 1
+    }
+  },
+  "дії": [
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.browser_click",
+      "навантаження": {
+        "index": "${index}"
+      }
+    }
+  ]
+}

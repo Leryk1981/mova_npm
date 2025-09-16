@@ -1,0 +1,8 @@
+{
+  "FROM_EMAIL": "you@example.com",
+  "TO_EMAILS": "client@example.com",
+  "SUBJECT": "Test subject",
+  "PLAIN_TEXT": "Hello from MOVA platform",
+  "HTML_CONTENT": "<strong>Hello</strong>",
+  "SG_KEY_NAME": "SENDGRID_API_KEY"
+}

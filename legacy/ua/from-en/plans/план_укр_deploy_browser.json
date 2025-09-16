@@ -1,0 +1,37 @@
+{
+  "версія": "3.3",
+  "id": "mova.recipes.deploy_browser",
+  "опис": "Deploy service and perform browser navigation",
+  "політики": {
+    "таймаут_мс": 20000,
+    "повтор": {
+      "max_attempts": 2,
+      "strategy": "exp",
+      "backoff_ms": [
+        1000,
+        2000
+      ]
+    },
+    "бюджет_мс": 30000
+  },
+  "змінні": {
+    "service_name": "${service_name}",
+    "url": "${url}"
+  },
+  "дії": [
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.deploy_service",
+      "навантаження": {
+        "service_name": "${service_name}"
+      }
+    },
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.browser_navigate",
+      "навантаження": {
+        "url": "${url}"
+      }
+    }
+  ]
+}

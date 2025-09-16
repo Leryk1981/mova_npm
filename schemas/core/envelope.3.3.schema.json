@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/core/envelope.3.3.schema.json",
   "title": "MOVA Envelope",
   "description": "Канонічна схема для 'конверта' або 'плану' MOVA.",
@@ -152,6 +152,9 @@
         },
         {
           "$ref": "https://mova.dev/schemas/actions/vnl.schema.json"
+        },
+        {
+          "$ref": "https://mova.dev/schemas/actions/secrets.schema.json"
         }
       ]
     }
@@ -184,3 +187,4 @@
     }
   ]
 }
+

@@ -1,0 +1,120 @@
+{
+  "id": "discord_send_message",
+  "i18n": {
+    "title": {
+      "uk": "Надіслати повідомлення в Discord"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      },
+      "security": {
+        "uk": "Безпека"
+      }
+    },
+    "fields": {
+      "CONTENT": {
+        "uk": "Текст повідомлення"
+      },
+      "USERNAME": {
+        "uk": "Ім'я користувача"
+      },
+      "AVATAR_URL": {
+        "uk": "URL аватара"
+      },
+      "DISCORD_WEBHOOK_SECRET_NAME": {
+        "uk": "Alias секрету webhook"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "CONTENT",
+          "type": "textarea",
+          "required": true,
+          "sample": "Hello from MOVA!"
+        },
+        {
+          "key": "USERNAME",
+          "type": "text",
+          "required": false,
+          "default": "MOVA Bot"
+        },
+        {
+          "key": "AVATAR_URL",
+          "type": "url",
+          "required": false,
+          "sample": "https://example.com/avatar.png"
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "fields": [
+        {
+          "key": "DISCORD_WEBHOOK_SECRET_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "DISCORD_WEBHOOK_URL"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "$comment": "Discord: повідомлення через Incoming Webhook.",
+    "actions": [
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "discord_webhook_url"
+      },
+      {
+        "type": "http_request",
+        "invoke": "http:request",
+        "payload": {
+          "url": "{+discord_webhook_url}",
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "content": "",
+            "username": "",
+            "avatar_url": ""
+          },
+          "result_in": "vars.resp"
+        }
+      },
+      {
+        "type": "print",
+        "message": "Discord accepted (status in vars.resp.__status)"
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "DISCORD_WEBHOOK_SECRET_NAME",
+      "to": "/actions/0/name",
+      "severity": "error"
+    },
+    {
+      "from": "CONTENT",
+      "to": "/actions/1/payload/body/content",
+      "severity": "error"
+    },
+    {
+      "from": "USERNAME",
+      "to": "/actions/1/payload/body/username",
+      "severity": "warn"
+    },
+    {
+      "from": "AVATAR_URL",
+      "to": "/actions/1/payload/body/avatar_url",
+      "severity": "warn"
+    }
+  ]
+}

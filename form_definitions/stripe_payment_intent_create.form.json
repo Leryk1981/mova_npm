@@ -1,0 +1,31 @@
+{
+  "id": "stripe_payment_intent_create",
+  "title": "Stripe — створення Payment Intent",
+  "category": "payments",
+  "lang": "uk",
+  "source": "templates/blank/ua/stripe_payment_intent_create_blank.json",
+  "output": "templates/ua/stripe_payment_intent_create.json",
+  "sections": [
+    {
+      "title": "Платіж",
+      "fields": [
+        { "key": "AMOUNT", "label": "Сума (в мінорних одиницях)", "type": "number", "required": true, "placeholder": "1000" },
+        { "key": "CURRENCY", "label": "Валюта", "type": "text", "required": true, "placeholder": "usd", "default": "usd" }
+      ]
+    },
+    {
+      "title": "Безпека",
+      "fields": [
+        { "key": "STRIPE_API_KEY", "label": "Alias секрету API ключа", "type": "secret-alias", "required": true, "default": "STRIPE_API_KEY" }
+      ]
+    }
+  ],
+  "mapping": {
+    "AMOUNT": "<AMOUNT>",
+    "CURRENCY": "<CURRENCY>",
+    "STRIPE_API_KEY": "<STRIPE_API_KEY>"
+  },
+  "actions": {
+    "onComplete": ["scaffold", "translate", "validate", "run"]
+  }
+}

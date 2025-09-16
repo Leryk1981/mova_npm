@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mova.dev/schemas/form_spec.schema.json",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z_]+$",
+      "description": "Template ID in snake_case"
+    },
+    "i18n": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "object",
+          "patternProperties": {
+            ".*": { "type": "string" }
+          }
+        },
+        "sections": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "object",
+              "patternProperties": {
+                ".*": { "type": "string" }
+              }
+            }
+          }
+        },
+        "fields": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "object",
+              "patternProperties": {
+                ".*": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "required": ["title", "sections", "fields"]
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string" },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string" },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "textarea",
+                    "email",
+                    "number",
+                    "url",
+                    "tel",
+                    "secret-alias",
+                    "select",
+                    "checkbox",
+                    "array",
+                    "object"
+                  ]
+                },
+                "required": { "type": "boolean" },
+                "default": {
+                  "oneOf": [
+                    { "type": "string" },
+                    { "type": "number" },
+                    { "type": "integer" },
+                    { "type": "boolean" },
+                    { "type": "object" },
+                    { "type": "array" },
+                    { "type": "null" }
+                  ]
+                },
+                "sample": {
+                  "oneOf": [
+                    { "type": "string" },
+                    { "type": "number" },
+                    { "type": "integer" },
+                    { "type": "boolean" },
+                    { "type": "object" },
+                    { "type": "array" },
+                    { "type": "null" }
+                  ]
+                },
+                "validators": {
+                  "type": "object",
+                  "properties": {
+                    "pattern": { "type": "string" },
+                    "min": { "type": "number" },
+                    "max": { "type": "number" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": ["key", "type", "required"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["key", "fields"],
+        "additionalProperties": false
+      }
+    },
+    "baseCanonical": {
+      "type": "object",
+      "properties": {
+        "mova_version": { "type": "string" },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" }
+            },
+            "required": ["type"],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": ["mova_version", "actions"],
+      "additionalProperties": true
+    },
+    "bind": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string" },
+          "to": {
+            "type": "string",
+            "pattern": "^(/[^/]+)+$",
+            "description": "JSON Pointer"
+          },
+          "transform": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["error", "warn"]
+          },
+          "transformArgs": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "integer" },
+              { "type": "boolean" },
+              { "type": "object" },
+              { "type": "array" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["from", "to"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["id", "i18n", "sections", "baseCanonical", "bind"],
+  "additionalProperties": false
+}

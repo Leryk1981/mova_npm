@@ -1,0 +1,53 @@
+{
+  "версія": "3.3",
+  "$comment": "SendGrid: мінімальний лист (from, to[], subject, text/html).",
+  "дії": [
+    {
+      "type": "отримати_секрет",
+      "name": "<SG_KEY_NAME>",
+      "out": "vars.sg"
+    },
+    {
+      "type": "http_запит",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://api.sendgrid.com/v3/mail/send",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer ${vars.sg}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "from": {
+            "email": "<FROM_EMAIL>"
+          },
+          "personalizations": [
+            {
+              "to": [
+                {
+                  "email": "<TO_EMAILS>"
+                }
+              ]
+            }
+          ],
+          "subject": "<SUBJECT>",
+          "content": [
+            {
+              "type": "text/plain",
+              "value": "<PLAIN_TEXT>"
+            },
+            {
+              "type": "text/html",
+              "value": "<HTML_CONTENT>"
+            }
+          ]
+        },
+        "result_in": "vars.sg_resp"
+      }
+    },
+    {
+      "type": "print",
+      "message": "SendGrid accepted (status in vars.sg_resp.__status)"
+    }
+  ]
+}

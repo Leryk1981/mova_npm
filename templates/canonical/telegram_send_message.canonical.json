@@ -1,0 +1,33 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "secrets.get",
+      "name": "TELEGRAM_BOT_TOKEN",
+      "out": "telegram_token"
+    },
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://api.telegram.org/bot${telegram_token}/sendMessage",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "chat_id": "",
+          "text": "",
+          "parse_mode": "",
+          "disable_web_page_preview": false
+        }
+      },
+      "body": {
+        "chat_id": "123456789",
+        "text": "Hello!",
+        "parse_mode": "HTML",
+        "disable_web_page_preview": false
+      }
+    }
+  ]
+}

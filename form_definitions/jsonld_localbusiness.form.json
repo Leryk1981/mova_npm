@@ -1,0 +1,55 @@
+{
+  "id": "jsonld_localbusiness",
+  "title": "JSON-LD LocalBusiness",
+  "category": "seo",
+  "lang": "uk",
+  "source": "templates/blank/ua/jsonld_localbusiness_blank.json",
+  "output": "templates/ua/jsonld_localbusiness.json",
+  "sections": [
+    {
+      "title": "Основна інформація",
+      "fields": [
+        { "key": "NAME", "label": "Назва бізнесу", "type": "text", "required": true, "placeholder": "Мій бізнес" },
+        { "key": "DESCRIPTION", "label": "Опис", "type": "textarea", "required": false, "placeholder": "Опис бізнесу" },
+        { "key": "URL", "label": "Веб-сайт", "type": "text", "required": false, "placeholder": "https://example.com" }
+      ]
+    },
+    {
+      "title": "Контакти",
+      "fields": [
+        { "key": "PHONE", "label": "Телефон", "type": "text", "required": false, "placeholder": "+380501234567" },
+        { "key": "EMAIL", "label": "Email", "type": "email", "required": false, "placeholder": "info@example.com" }
+      ]
+    },
+    {
+      "title": "Адреса",
+      "fields": [
+        { "key": "STREET_ADDRESS", "label": "Вулиця", "type": "text", "required": false, "placeholder": "вул. Шевченка, 1" },
+        { "key": "CITY", "label": "Місто", "type": "text", "required": false, "placeholder": "Київ" },
+        { "key": "POSTAL_CODE", "label": "Поштовий індекс", "type": "text", "required": false, "placeholder": "01001" },
+        { "key": "COUNTRY", "label": "Країна", "type": "text", "required": false, "placeholder": "Україна" }
+      ]
+    },
+    {
+      "title": "Вивід",
+      "fields": [
+        { "key": "OUTPUT_FILE", "label": "Шлях до файлу виводу", "type": "text", "required": true, "placeholder": "business.jsonld", "default": "localbusiness.jsonld" }
+      ]
+    }
+  ],
+  "mapping": {
+    "NAME": "<NAME>",
+    "DESCRIPTION": "<DESCRIPTION>",
+    "URL": "<URL>",
+    "PHONE": "<PHONE>",
+    "EMAIL": "<EMAIL>",
+    "STREET_ADDRESS": "<STREET_ADDRESS>",
+    "CITY": "<CITY>",
+    "POSTAL_CODE": "<POSTAL_CODE>",
+    "COUNTRY": "<COUNTRY>",
+    "OUTPUT_FILE": "<OUTPUT_FILE>"
+  },
+  "actions": {
+    "onComplete": ["scaffold", "translate", "validate", "run"]
+  }
+}

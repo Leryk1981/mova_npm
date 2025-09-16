@@ -1,0 +1,119 @@
+{
+  "id": "google_sheets_append",
+  "i18n": {
+    "title": {
+      "uk": "Додати рядки до Google Sheets"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      },
+      "security": {
+        "uk": "Безпека"
+      }
+    },
+    "fields": {
+      "SHEETS_API_KEY_NAME": {
+        "uk": "Alias API ключа"
+      },
+      "SPREADSHEET_ID": {
+        "uk": "ID таблиці"
+      },
+      "RANGE": {
+        "uk": "Діапазон"
+      },
+      "ROW_DATA_JSON": {
+        "uk": "Дані рядків (JSON)"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "SPREADSHEET_ID",
+          "type": "text",
+          "required": true,
+          "sample": "1abc...xyz"
+        },
+        {
+          "key": "RANGE",
+          "type": "text",
+          "required": true,
+          "default": "Sheet1!A:B",
+          "sample": "Sheet1!A1:D1"
+        },
+        {
+          "key": "ROW_DATA_JSON",
+          "type": "textarea",
+          "required": true,
+          "default": "{\"values\": [[\"Name\", \"Email\", \"2024-01-01\"]]}"
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "fields": [
+        {
+          "key": "SHEETS_API_KEY_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "GOOGLE_SHEETS_TOKEN"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "actions": [
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "api_key"
+      },
+      {
+        "type": "http_request",
+        "invoke": "http:request",
+        "payload": {
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}:append?valueInputOption=RAW",
+          "method": "POST",
+          "headers": {
+            "Authorization": "",
+            "Content-Type": "application/json"
+          },
+          "body": ""
+        }
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "SHEETS_API_KEY_NAME",
+      "to": "/actions/0/name",
+      "severity": "error"
+    },
+    {
+      "from": "SHEETS_API_KEY_NAME",
+      "to": "/actions/1/headers/Authorization",
+      "transform": "bearerFromAlias",
+      "severity": "error"
+    },
+    {
+      "from": "SPREADSHEET_ID",
+      "to": "/actions/1/url",
+      "severity": "error"
+    },
+    {
+      "from": "RANGE",
+      "to": "/actions/1/url",
+      "severity": "error"
+    },
+    {
+      "from": "ROW_DATA_JSON",
+      "to": "/actions/1/body",
+      "transform": "json",
+      "severity": "error"
+    }
+  ]
+}

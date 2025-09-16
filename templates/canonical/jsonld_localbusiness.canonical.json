@@ -8,33 +8,31 @@
       "@language": "uk"
     },
     "@type": "LocalBusiness",
-    "name": "<BUSINESS_NAME>",
-    "url": "<URL>",
-    "logo": "<LOGO_URL>",
+    "name": "MOVA Bakery",
+    "url": "https://mova.example.com",
+    "logo": "https://mova.example.com/logo.png",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "<STREET_ADDRESS>",
-      "addressLocality": "<ADDRESS_LOCALITY>",
-      "addressRegion": "<ADDRESS_REGION>",
-      "postalCode": "<POSTAL_CODE>",
-      "addressCountry": "<ADDRESS_COUNTRY>"
+      "streetAddress": "123 Main St",
+      "addressLocality": "Kyiv",
+      "addressRegion": "Kyiv Oblast",
+      "postalCode": "01001",
+      "addressCountry": "UA"
     },
-    "telephone": "<TELEPHONE>",
+    "telephone": "+380441234567",
     "openingHours": [
-      "<OPENING_HOURS_ARRAY>"
+      "Mo-Fr 09:00-18:00"
     ]
   },
   "actions": [
     {
       "type": "file_write",
-      "path": "<OUT_FILE>",
-      "content": "${payload}",
-      "content_type": "application/ld+json",
-      "$comment": "Або покладатися на кореневий тип_навантаження; продубльовано для ясності."
+      "path": "dist/seo/localbusiness.jsonld",
+      "data": "${payload}"
     },
     {
       "type": "print",
-      "message": "JSON-LD LocalBusiness збережено у <OUT_FILE>"
+      "message": "JSON-LD LocalBusiness збережено"
     }
   ]
 }

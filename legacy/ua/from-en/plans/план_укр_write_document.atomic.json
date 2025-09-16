@@ -1,0 +1,21 @@
+{
+  "версія": "3.3",
+  "id": "mova.write_document.atomic",
+  "опис": "Atomic call for mova.write_document",
+  "політики": {
+    "таймаут_мс": 10000,
+    "повтор": {
+      "max_attempts": 1
+    }
+  },
+  "дії": [
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.write_document",
+      "навантаження": {
+        "content": "${content}",
+        "format": "${format}"
+      }
+    }
+  ]
+}

@@ -3,24 +3,27 @@
   "$comment": "Slack: надсилання повідомлення через Incoming Webhook.",
   "actions": [
     {
-      "type": "отримати_секрет",
+      "type": "secrets.get",
       "name": "SLACK_WEBHOOK_URL",
-      "out": "vars.webhook_url"
+      "out": "slack_webhook_url"
     },
     {
-      "type": "http_fetch",
-      "method": "POST",
-      "url": "${vars.webhook_url}",
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "body": {
-        "text": "'Hello",
-        "channel": "'#general'",
-        "username": "'MOVA",
-        "icon_emoji": "':robot_face:'"
-      },
-      "out": "vars.slack_response"
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "{+slack_webhook_url}",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "text": "Привіт із MOVA!",
+          "channel": "#general",
+          "username": "MOVA Bot",
+          "icon_emoji": ":robot_face:"
+        },
+        "result_in": "vars.slack_response"
+      }
     },
     {
       "type": "print",

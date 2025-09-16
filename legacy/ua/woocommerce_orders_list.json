@@ -1,0 +1,86 @@
+{
+  "версія": "3.3",
+  "$comment": "WooCommerce: отримання замовлень із пагінацією, запис у NDJSON.",
+  "дії": [
+    {
+      "type": "отримати_секрет",
+      "name": "<CK_SECRET_NAME>",
+      "out": "vars.ck"
+    },
+    {
+      "type": "отримати_секрет",
+      "name": "<CS_SECRET_NAME>",
+      "out": "vars.cs"
+    },
+    {
+      "type": "set",
+      "invoke": "context:set",
+      "payload": {
+        "variable": "woocommerce_base_url",
+        "value": "<BASE_URL>"
+      }
+    },
+    {
+      "type": "set",
+      "invoke": "context:set",
+      "payload": {
+        "variable": "vars.page",
+        "value": 1
+      }
+    },
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "{+woocommerce_base_url}/wp-json/wc/v3/orders",
+        "method": "GET",
+        "headers": {
+          "Authorization": "Basic ${base64.encode(vars.ck + ':' + vars.cs)}"
+        },
+        "query": {
+          "per_page": 100,
+          "page": "${vars.page}",
+          "status": "<STATUS>",
+          "after": "<AFTER_ISO>"
+        },
+        "result_in": "vars.page_data"
+      }
+    },
+    {
+      "type": "if",
+      "when": "${Array.isArray(vars.page_data) && vars.page_data.length > 0}",
+      "then": [
+        {
+          "type": "set",
+          "invoke": "context:set",
+          "payload": {
+            "variable": "vars.current_order",
+            "value": "${vars.page_data[0]}"
+          }
+        },
+        {
+          "type": "file_write",
+          "path": "<OUT_FILE>",
+          "data": "${vars.current_order}"
+        },
+        {
+          "type": "set",
+          "invoke": "context:set",
+          "payload": {
+            "variable": "vars.page",
+            "value": "${vars.page + 1}"
+          }
+        }
+      ],
+      "else": [
+        {
+          "type": "return",
+          "invoke": "flow:return",
+          "payload": {
+            "value": "done"
+          }
+        }
+      ]
+    }
+  ]
+}

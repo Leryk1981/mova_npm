@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const root = resolve(__dirname, '../..');
+const root = resolve(__dirname, '..');
 
 const blankPath = process.argv[2];
 const outputPath = process.argv[3];
@@ -45,9 +45,11 @@ if (!existsSync(outputDir)) {
 // Парсимо заміни
 const replaceMap = {};
 replacements.forEach(arg => {
-  const [key, ...valueParts] = arg.split('=');
-  if (key && valueParts.length > 0) {
-    replaceMap[key] = valueParts.join('=');
+  const eqIndex = arg.indexOf('=');
+  if (eqIndex > 0) {
+    const key = arg.substring(0, eqIndex);
+    const value = arg.substring(eqIndex + 1);
+    replaceMap[key] = value;
   }
 });
 
@@ -56,12 +58,14 @@ try {
 
   // Замінюємо плейсхолдери <KEY> на значення
   for (const [key, value] of Object.entries(replaceMap)) {
-    const placeholder = `<${key}>`;
-    content = content.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
+    content = content.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), value);
   }
 
+  console.log(`Після заміни, розмір content: ${content.length}`);
+  console.log(`Content preview: ${content.substring(500, 600)}`);
   writeFileSync(outputFullPath, content, 'utf-8');
   console.log(`✅ Створено файл: ${outputPath}`);
+  console.log(`Розмір файлу: ${content.length} символів`);
 
   // Перевіряємо, чи залишились плейсхолдери
   const remainingPlaceholders = content.match(/<[^>]+>/g);

@@ -1,0 +1,13 @@
+{
+  "BUSINESS_NAME": "MOVA Bakery",
+  "STREET_ADDRESS": "123 Main St",
+  "ADDRESS_LOCALITY": "Kyiv",
+  "ADDRESS_REGION": "Kyiv Oblast",
+  "POSTAL_CODE": "01001",
+  "ADDRESS_COUNTRY": "UA",
+  "TELEPHONE": "+380441234567",
+  "OPENING_HOURS_ARRAY": "[\"Mo-Fr 09:00-18:00\"]",
+  "URL": "https://mova.example.com",
+  "LOGO_URL": "https://mova.example.com/logo.png",
+  "OUT_FILE": "dist/seo/localbusiness.jsonld"
+}

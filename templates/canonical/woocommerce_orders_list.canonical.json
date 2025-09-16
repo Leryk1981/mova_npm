@@ -3,86 +3,82 @@
   "$comment": "WooCommerce: отримання замовлень із пагінацією, запис у NDJSON.",
   "actions": [
     {
-      "type": "отримати_секрет",
-      "name": "<CK_SECRET_NAME>",
+      "type": "secrets.get",
+      "name": "WC_CONSUMER_KEY",
       "out": "vars.ck"
     },
     {
-      "type": "отримати_секрет",
-      "name": "<CS_SECRET_NAME>",
+      "type": "secrets.get",
+      "name": "WC_CONSUMER_SECRET",
       "out": "vars.cs"
     },
     {
       "type": "set",
-      "to": "vars.base",
-      "value": "<BASE_URL>"
+      "invoke": "context:set",
+      "payload": {
+        "variable": "woocommerce_base_url",
+        "value": "https://store.example.com"
+      }
     },
     {
       "type": "set",
-      "to": "vars.page",
-      "value": 1
+      "invoke": "context:set",
+      "payload": {
+        "variable": "vars.page",
+        "value": 1
+      }
     },
     {
-      "type": "for_each",
-      "список": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
-      "loop_variable": "i",
-      "body": [
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "{+woocommerce_base_url}/wp-json/wc/v3/orders",
+        "method": "GET",
+        "headers": {
+          "Authorization": "Basic ${base64.encode(vars.ck + ':' + vars.cs)}"
+        },
+        "query": {
+          "per_page": 100,
+          "page": "${vars.page}",
+          "status": "any",
+          "after": "2024-01-01T00:00:00Z"
+        },
+        "result_in": "vars.page_data"
+      }
+    },
+    {
+      "type": "if",
+      "when": "${Array.isArray(vars.page_data) && vars.page_data.length > 0}",
+      "then": [
         {
-          "type": "http_fetch",
-          "method": "GET",
-          "url": "${vars.base}/wp-json/wc/v3/orders",
-          "auth": {
-            "type": "basic",
-            "username": "${vars.ck}",
-            "password": "${vars.cs}"
-          },
-          "query": {
-            "per_page": 100,
-            "page": "${vars.page}",
-            "status": "<STATUS>",
-            "after": "<AFTER_ISO>"
-          },
-          "out": "vars.page_data"
+          "type": "set",
+          "invoke": "context:set",
+          "payload": {
+            "variable": "vars.current_order",
+            "value": "${vars.page_data[0]}"
+          }
         },
         {
-          "type": "if",
-          "expr": "${Array.isArray(vars.page_data) && vars.page_data.length > 0}",
-          "then": [
-            {
-              "type": "for_each",
-              "list": "${vars.page_data}",
-              "loop_variable": "order",
-              "actions": [
-                {
-                  "type": "file_append_jsonl",
-                  "path": "<OUT_FILE>",
-                  "value": "${order}"
-                }
-              ]
-            },
-            {
-              "type": "set",
-              "to": "vars.page",
-              "value": "${vars.page + 1}"
-            }
-          ],
-          "else": [
-            {
-              "type": "return",
-              "value": "done"
-            }
-          ]
+          "type": "file_write",
+          "path": "out/wc_orders.ndjson",
+          "data": "${vars.current_order}"
+        },
+        {
+          "type": "set",
+          "invoke": "context:set",
+          "payload": {
+            "variable": "vars.page",
+            "value": "${vars.page + 1}"
+          }
+        }
+      ],
+      "else": [
+        {
+          "type": "return",
+          "invoke": "flow:return",
+          "payload": {
+            "value": "done"
+          }
         }
       ]
     }

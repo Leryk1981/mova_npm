@@ -1,0 +1,39 @@
+{
+  "версія": "3.3",
+  "id": "mova.recipes.browser_search",
+  "політики": {
+    "таймаут_мс": 15000,
+    "повтор": {
+      "max_attempts": 1
+    }
+  },
+  "змінні": {
+    "url": "${url}",
+    "query": "${query}",
+    "result_index": "${result_index}"
+  },
+  "дії": [
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.browser_navigate",
+      "навантаження": {
+        "url": "${url}"
+      }
+    },
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.browser_input",
+      "навантаження": {
+        "текст": "${query}",
+        "press_enter": true
+      }
+    },
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.browser_click",
+      "навантаження": {
+        "index": "${result_index}"
+      }
+    }
+  ]
+}

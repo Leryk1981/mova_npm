@@ -1,0 +1,32 @@
+{
+  "mova_version": "3.3",
+  "$comment": "Discord: повідомлення через Incoming Webhook.",
+  "actions": [
+    {
+      "type": "secrets.get",
+      "name": "<DISCORD_WEBHOOK_SECRET_NAME>",
+      "out": "discord_webhook_url"
+    },
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "{+discord_webhook_url}",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "content": "<CONTENT>",
+          "username": "<USERNAME>",
+          "avatar_url": "<AVATAR_URL>"
+        },
+        "result_in": "vars.resp"
+      }
+    },
+    {
+      "type": "print",
+      "message": "Discord accepted (status in vars.resp.__status)"
+    }
+  ]
+}

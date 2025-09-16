@@ -1,0 +1,7 @@
+{
+  "MESSAGE_TEXT": "Привіт із MOVA!",
+  "CHANNEL": "#general",
+  "USERNAME": "MOVA Bot",
+  "ICON_EMOJI": ":robot_face:",
+  "SLACK_WEBHOOK_NAME": "SLACK_WEBHOOK_URL"
+}

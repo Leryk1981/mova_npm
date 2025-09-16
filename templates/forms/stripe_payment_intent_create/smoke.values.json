@@ -1,0 +1,6 @@
+{
+  "AMOUNT_MINOR": 2500,
+  "CURRENCY": "EUR",
+  "DESCRIPTION": "Test order",
+  "STRIPE_KEY_NAME": "STRIPE_API_KEY"
+}

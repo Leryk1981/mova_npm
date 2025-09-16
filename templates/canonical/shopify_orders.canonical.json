@@ -1,0 +1,32 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "secrets.get",
+      "name": "WC_CONSUMER_KEY",
+      "out": "ck"
+    },
+    {
+      "type": "secrets.get",
+      "name": "WC_CONSUMER_SECRET",
+      "out": "cs"
+    },
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "2024-01-01T00:00:00Z",
+        "method": "GET",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic ${base64.encode(ck + ':' + cs)}"
+        }
+      }
+    },
+    {
+      "type": "file_write",
+      "path": "out/shopify_orders.ndjson",
+      "data": "${response.body}"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
  {
-  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/actions/emit_event.schema.json",
   "title": "Action: Emit Event",
   "description": "Схема для дії, що генерує подію у вказаний канал.",

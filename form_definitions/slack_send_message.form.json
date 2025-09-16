@@ -1,0 +1,35 @@
+{
+  "id": "slack_send_message",
+  "title": "Slack — надсилання повідомлення",
+  "category": "messaging",
+  "lang": "uk",
+  "source": "templates/blank/ua/slack_send_message_blank.json",
+  "output": "templates/ua/slack_send_message.json",
+  "sections": [
+    {
+      "title": "Повідомлення",
+      "fields": [
+        { "key": "MESSAGE_TEXT", "label": "Текст повідомлення", "type": "textarea", "required": true, "placeholder": "Ваше повідомлення тут" },
+        { "key": "CHANNEL", "label": "Канал (опц.)", "type": "text", "required": false, "placeholder": "#general" },
+        { "key": "USERNAME", "label": "Ім'я користувача (опц.)", "type": "text", "required": false, "placeholder": "Bot" },
+        { "key": "ICON_EMOJI", "label": "Іконка emoji (опц.)", "type": "text", "required": false, "placeholder": ":robot:" }
+      ]
+    },
+    {
+      "title": "Безпека",
+      "fields": [
+        { "key": "SLACK_WEBHOOK_NAME", "label": "Alias секрету Webhook URL", "type": "secret-alias", "required": true, "default": "SLACK_WEBHOOK_URL" }
+      ]
+    }
+  ],
+  "mapping": {
+    "MESSAGE_TEXT": "<MESSAGE_TEXT>",
+    "CHANNEL": "<CHANNEL>",
+    "USERNAME": "<USERNAME>",
+    "ICON_EMOJI": "<ICON_EMOJI>",
+    "SLACK_WEBHOOK_NAME": "<SLACK_WEBHOOK_NAME>"
+  },
+  "actions": {
+    "onComplete": ["scaffold", "translate", "validate", "run"]
+  }
+}

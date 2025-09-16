@@ -1,0 +1,64 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://api.sendgrid.com/v3/mail/send",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": {
+            "$secret": "SENDGRID_API_KEY",
+            "as": "bearer"
+          }
+        },
+        "body": {
+          "from": {
+            "email": ""
+          },
+          "personalizations": [
+            {
+              "to": []
+            }
+          ],
+          "subject": "",
+          "content": [
+            {
+              "type": "text/plain",
+              "value": ""
+            },
+            {
+              "type": "text/html",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "body": {
+        "from": {
+          "email": "you@example.com"
+        },
+        "personalizations": [
+          {
+            "to": [
+              {
+                "email": "client@example.com"
+              }
+            ]
+          }
+        ],
+        "subject": "Test subject",
+        "content": [
+          {
+            "value": "Hello from MOVA platform"
+          },
+          {
+            "value": "<strong>Hello</strong>"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "версія": "3.3",
+  "id": "mova.recipes.messaging_write",
+  "опис": "Send message and write document",
+  "політики": {
+    "таймаут_мс": 15000,
+    "повтор": {
+      "max_attempts": 1
+    },
+    "мертва_черга": {
+      "enabled": true,
+      "ціль": "dlq.messaging"
+    }
+  },
+  "змінні": {
+    "topic": "${topic}",
+    "навантаження": "${payload}",
+    "content": "${content}",
+    "format": "${format}"
+  },
+  "дії": [
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.send_message",
+      "навантаження": {
+        "topic": "${topic}",
+        "навантаження": "${payload}"
+      }
+    },
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.write_document",
+      "навантаження": {
+        "content": "${content}",
+        "format": "${format}"
+      }
+    }
+  ]
+}

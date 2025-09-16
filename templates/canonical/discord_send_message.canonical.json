@@ -3,23 +3,26 @@
   "$comment": "Discord: повідомлення через Incoming Webhook.",
   "actions": [
     {
-      "type": "отримати_секрет",
-      "name": "<DISCORD_WEBHOOK_SECRET_NAME>",
-      "out": "vars.webhook"
+      "type": "secrets.get",
+      "name": "DISCORD_WEBHOOK_URL",
+      "out": "discord_webhook_url"
     },
     {
-      "type": "http_fetch",
-      "method": "POST",
-      "url": "${vars.webhook}",
-      "headers": {
-        "Content-Type": "application/json"
-      },
-      "body": {
-        "content": "<CONTENT>",
-        "username": "<USERNAME>",
-        "avatar_url": "<AVATAR_URL>"
-      },
-      "out": "vars.resp"
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "{+discord_webhook_url}",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "content": "Hello from MOVA!",
+          "username": "MOVA Bot",
+          "avatar_url": "https://example.com/avatar.png"
+        },
+        "result_in": "vars.resp"
+      }
     },
     {
       "type": "print",

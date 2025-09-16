@@ -1,0 +1,40 @@
+{
+  "id": "telegram_send_message",
+  "title": "Telegram — надсилання повідомлення",
+  "category": "messaging",
+  "lang": "uk",
+  "source": "templates/blank/ua/telegram_send_message_blank.json",
+  "output": "templates/ua/telegram_send_message.json",
+  "sections": [
+    {
+      "title": "Одержувач",
+      "fields": [
+        { "key": "CHAT_ID", "label": "Chat ID", "type": "text", "required": true, "placeholder": "@username або chat_id" }
+      ]
+    },
+    {
+      "title": "Повідомлення",
+      "fields": [
+        { "key": "MESSAGE_TEXT", "label": "Текст повідомлення", "type": "textarea", "required": true, "placeholder": "Ваше повідомлення тут" },
+        { "key": "PARSE_MODE", "label": "Режим парсингу (опц.)", "type": "text", "required": false, "placeholder": "HTML", "default": "HTML" },
+        { "key": "DISABLE_PREVIEW", "label": "Вимкнути прев'ю посилань", "type": "checkbox", "required": false, "default": false }
+      ]
+    },
+    {
+      "title": "Безпека",
+      "fields": [
+        { "key": "TELEGRAM_BOT_TOKEN_NAME", "label": "Alias секрету Bot Token", "type": "secret-alias", "required": true, "default": "TELEGRAM_BOT_TOKEN" }
+      ]
+    }
+  ],
+  "mapping": {
+    "CHAT_ID": "<CHAT_ID>",
+    "MESSAGE_TEXT": "<MESSAGE_TEXT>",
+    "PARSE_MODE": "<PARSE_MODE>",
+    "DISABLE_PREVIEW": "<DISABLE_PREVIEW>",
+    "TELEGRAM_BOT_TOKEN_NAME": "<TELEGRAM_BOT_TOKEN_NAME>"
+  },
+  "actions": {
+    "onComplete": ["scaffold", "translate", "validate", "run"]
+  }
+}

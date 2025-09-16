@@ -1,0 +1,159 @@
+{
+  "id": "sendgrid_send_mail",
+  "i18n": {
+    "title": {
+      "uk": "Надіслати лист (SendGrid)"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      },
+      "security": {
+        "uk": "Безпека"
+      }
+    },
+    "fields": {
+      "FROM_EMAIL": {
+        "uk": "Від кого (email)"
+      },
+      "TO_EMAILS": {
+        "uk": "Кому (email або список через кому)"
+      },
+      "SUBJECT": {
+        "uk": "Тема"
+      },
+      "PLAIN_TEXT": {
+        "uk": "Текст"
+      },
+      "HTML_CONTENT": {
+        "uk": "HTML (опц.)"
+      },
+      "SG_KEY_NAME": {
+        "uk": "Alias секрету API"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "FROM_EMAIL",
+          "type": "email",
+          "required": true,
+          "sample": "you@example.com",
+          "validators": {
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+          }
+        },
+        {
+          "key": "TO_EMAILS",
+          "type": "textarea",
+          "required": true,
+          "sample": "client@example.com"
+        },
+        {
+          "key": "SUBJECT",
+          "type": "text",
+          "required": true,
+          "sample": "Test subject"
+        },
+        {
+          "key": "PLAIN_TEXT",
+          "type": "textarea",
+          "required": true,
+          "sample": "Hello from MOVA platform"
+        },
+        {
+          "key": "HTML_CONTENT",
+          "type": "textarea",
+          "required": false,
+          "sample": "<strong>Hello</strong>"
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "fields": [
+        {
+          "key": "SG_KEY_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "SENDGRID_API_KEY"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "actions": [
+      {
+        "type": "http_request",
+        "invoke": "http:request",
+        "payload": {
+          "url": "https://api.sendgrid.com/v3/mail/send",
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": ""
+          },
+          "body": {
+            "from": {
+              "email": ""
+            },
+            "personalizations": [
+              {
+                "to": []
+              }
+            ],
+            "subject": "",
+            "content": [
+              {
+                "type": "text/plain",
+                "value": ""
+              },
+              {
+                "type": "text/html",
+                "value": ""
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "FROM_EMAIL",
+      "to": "/actions/0/body/from/email",
+      "severity": "error"
+    },
+    {
+      "from": "TO_EMAILS",
+      "to": "/actions/0/body/personalizations/0/to",
+      "transform": "emailsToArray",
+      "severity": "error"
+    },
+    {
+      "from": "SUBJECT",
+      "to": "/actions/0/body/subject",
+      "severity": "error"
+    },
+    {
+      "from": "PLAIN_TEXT",
+      "to": "/actions/0/body/content/0/value",
+      "severity": "error"
+    },
+    {
+      "from": "HTML_CONTENT",
+      "to": "/actions/0/body/content/1/value",
+      "severity": "warn"
+    },
+    {
+      "from": "SG_KEY_NAME",
+      "to": "/actions/0/payload/headers/Authorization",
+      "transform": "bearerFromAlias",
+      "severity": "error"
+    }
+  ]
+}

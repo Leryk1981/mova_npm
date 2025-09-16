@@ -1,0 +1,45 @@
+{
+  "id": "sendgrid_send_mail",
+  "title": "Надіслати лист (SendGrid)",
+  "category": "notifications",
+  "lang": "uk",
+  "source": "templates/blank/ua/sendgrid_send_mail_blank.json",
+  "output": "templates/ua/sendgrid_send_mail.json",
+  "sections": [
+    {
+      "title": "Відправник та одержувачі",
+      "fields": [
+        { "key": "FROM_EMAIL", "label": "Від кого (email)", "type": "email", "required": true, "placeholder": "you@example.com" },
+        { "key": "TO_EMAILS", "label": "Кому (email або список через кому)", "type": "textarea", "required": true, "placeholder": "client@example.com" }
+      ]
+    },
+    {
+      "title": "Зміст",
+      "fields": [
+        { "key": "SUBJECT", "label": "Тема", "type": "text", "required": true, "placeholder": "Ваша бронь підтверджена" },
+        { "key": "PLAIN_TEXT", "label": "Текст", "type": "textarea", "required": true, "placeholder": "Дякуємо за замовлення!" },
+        { "key": "HTML_CONTENT", "label": "HTML (опц.)", "type": "textarea", "required": false, "placeholder": "<b>Дякуємо</b> за замовлення!" }
+      ]
+    },
+    {
+      "title": "Безпека",
+      "fields": [
+        { "key": "SG_KEY_NAME", "label": "Alias секрету API", "type": "secret-alias", "required": true, "default": "SENDGRID_API_KEY" }
+      ]
+    }
+  ],
+  "mapping": {
+    "FROM_EMAIL": "<FROM_EMAIL>",
+    "TO_EMAILS": "<TO_EMAILS>",
+    "SUBJECT": "<SUBJECT>",
+    "PLAIN_TEXT": "<PLAIN_TEXT>",
+    "HTML_CONTENT": "<HTML_CONTENT>",
+    "SG_KEY_NAME": "<SG_KEY_NAME>"
+  },
+  "postprocess": [
+    { "type": "emails_to_personalizations", "from": "TO_EMAILS" }
+  ],
+  "actions": {
+    "onComplete": ["translate", "validate", "preview"]
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/actions/parallel.schema.json",
   "title": "Action: Parallel",
   "description": "Схема для дії, що виконує блоки дій паралельно.",

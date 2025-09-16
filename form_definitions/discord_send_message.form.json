@@ -1,0 +1,33 @@
+{
+  "id": "discord_send_message",
+  "title": "Discord — надсилання повідомлення",
+  "category": "messaging",
+  "lang": "uk",
+  "source": "templates/blank/ua/discord_send_message_blank.json",
+  "output": "templates/ua/discord_send_message.json",
+  "sections": [
+    {
+      "title": "Повідомлення",
+      "fields": [
+        { "key": "CONTENT", "label": "Текст повідомлення", "type": "textarea", "required": true, "placeholder": "Ваше повідомлення тут" },
+        { "key": "USERNAME", "label": "Ім'я користувача (опц.)", "type": "text", "required": false, "placeholder": "Bot" },
+        { "key": "AVATAR_URL", "label": "URL аватара (опц.)", "type": "url", "required": false, "placeholder": "https://example.com/avatar.png" }
+      ]
+    },
+    {
+      "title": "Безпека",
+      "fields": [
+        { "key": "DISCORD_WEBHOOK_SECRET_NAME", "label": "Alias секрету Webhook URL", "type": "secret-alias", "required": true, "default": "DISCORD_WEBHOOK_URL" }
+      ]
+    }
+  ],
+  "mapping": {
+    "CONTENT": "<CONTENT>",
+    "USERNAME": "<USERNAME>",
+    "AVATAR_URL": "<AVATAR_URL>",
+    "DISCORD_WEBHOOK_SECRET_NAME": "<DISCORD_WEBHOOK_SECRET_NAME>"
+  },
+  "actions": {
+    "onComplete": ["scaffold", "translate", "validate", "run"]
+  }
+}

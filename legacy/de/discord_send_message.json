@@ -1,0 +1,29 @@
+{
+  "version": "3.3",
+  "$comment": "Discord: Nachricht über Incoming Webhook senden.",
+  "aktionen": [
+    {
+      "typ": "geheimnis_holen",
+      "name": "<DISCORD_WEBHOOK_SECRET_NAME>",
+      "out": "discord_webhook_url"
+    },
+    {
+      "typ": "http_anfrage",
+      "methode": "POST",
+      "url": "{+discord_webhook_url}",
+      "header": {
+        "Content-Type": "application/json"
+      },
+      "körper": {
+        "content": "<CONTENT>",
+        "username": "<USERNAME>",
+        "avatar_url": "<AVATAR_URL>"
+      },
+      "out": "vars.resp"
+    },
+    {
+      "typ": "drucken",
+      "nachricht": "Discord akzeptiert (Status in vars.resp.__status)"
+    }
+  ]
+}

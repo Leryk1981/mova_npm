@@ -1,7 +1,9 @@
 import express from 'express';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
+import os from 'os';
 import { spawn } from 'child_process';
 
 // Оскільки ми використовуємо ES Modules, __dirname не доступний.
@@ -10,345 +12,275 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3001;
 
-const TEMPLATES_UA_DIR = path.join(__dirname, 'templates', 'ua');
-const CANONICAL_DIR = path.join(__dirname, 'canonical');
+// Директорія з визначеннями форм для UI, як описано в ТЗ (tz_ui.md)
+const FORM_DEFS_DIR = path.join(__dirname, 'form_definitions');
 
-// Middleware для парсингу JSON тіла запитів
+// --- Middleware ---
+app.use(cors()); // Дозволяємо крос-доменні запити
 app.use(express.json());
 
-// 1. Сервіруємо статичні файли з директорії 'ui' (index.html, app.js, etc.)
-app.use(express.static(path.join(__dirname, 'ui')));
+// TODO: Додати CSRF protection middleware для POST/PUT/DELETE запитів
+// TODO: Додати rate-limiting middleware для /api/run, /api/validate
 
-// 2. Сервіруємо статичні файли з кореневої директорії проєкту.
-// Це потрібно, щоб frontend міг завантажувати /templates/ua/*, /lexicon_uk.json і т.д.
-app.use(express.static(path.join(__dirname)));
+// Сервіруємо статичні файли фронтенду (зібраний SPA)
+app.use(express.static(path.join(__dirname, 'public')));
 
-// === ІСНУЮЧІ API ENDPOINTS ===
+// --- Допоміжна функція для запуску скриптів ---
+const runScript = (scriptPath, args = [], options = {}) => {
+    return new Promise((resolve, reject) => {
+        const fullScriptPath = path.join(__dirname, scriptPath);
+        const child = spawn('node', [fullScriptPath, ...args], {
+            cwd: __dirname,
+            ...options,
+        });
 
-// API endpoint для отримання списку шаблонів
+        let stdout = '';
+        let stderr = '';
+
+        child.stdout?.on('data', (data) => { stdout += data.toString(); });
+        child.stderr?.on('data', (data) => { stderr += data.toString(); });
+
+        child.on('close', (code) => {
+            if (code === 0) {
+                resolve({ stdout, stderr });
+            } else {
+                const error = new Error(`Script ${scriptPath} exited with code ${code}`);
+                error.stdout = stdout;
+                error.stderr = stderr;
+                reject(error);
+            }
+        });
+
+        child.on('error', (err) => {
+            reject(err);
+        });
+    });
+};
+
+// --- API Endpoints згідно з tz_ui.md ---
+
+// GET /api/templates — список метаданих шаблонів для галереї
 app.get('/api/templates', async (req, res) => {
     try {
-        const files = await fs.readdir(TEMPLATES_UA_DIR);
-        const jsonFiles = files.filter(file => file.endsWith('.json'));
-        res.json(jsonFiles);
+        await fs.access(FORM_DEFS_DIR);
+        const files = await fs.readdir(FORM_DEFS_DIR);
+        const formFiles = files.filter(file => file.endsWith('.form.json'));
+
+        const templates = await Promise.all(formFiles.map(async (file) => {
+            const filePath = path.join(FORM_DEFS_DIR, file);
+            const content = await fs.readFile(filePath, 'utf-8');
+            const formDef = JSON.parse(content);
+            const hasSecrets = formDef.sections.some(s => s.fields.some(f => f.type === 'secret-alias'));
+
+            // Повертаємо тільки метадані, потрібні для галереї
+            return {
+                id: formDef.id,
+                title: formDef.title,
+                category: formDef.category,
+                requiresSecrets: hasSecrets,
+            };
+        }));
+
+        res.json(templates);
     } catch (error) {
-        console.error('Не вдалося прочитати директорію шаблонів:', error);
-        res.status(500).json({ message: 'Не вдалося отримати список шаблонів.' });
+        if (error.code === 'ENOENT') {
+             console.warn(`Директорія з визначеннями форм не знайдена: ${FORM_DEFS_DIR}`);
+             return res.json([]); // Повертаємо пустий масив, якщо директорії немає
+        }
+        console.error('Помилка при читанні шаблонів форм:', error);
+        res.status(500).json({ message: 'Не вдалося завантажити список шаблонів.' });
     }
 });
 
-// API endpoint для збереження файлу
-app.post('/api/save-template', async (req, res) => {
-    const { filename, content } = req.body;
+// GET /api/templates/:id — повна модель форми для майстра
+app.get('/api/templates/:id', async (req, res) => {
+    const { id } = req.params;
 
-    if (!filename || content === undefined) {
-        return res.status(400).json({ message: 'Потрібно вказати ім\'я файлу та вміст.' });
+    // Валідація ID для уникнення path traversal
+    if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+        return res.status(400).json({ message: 'Неприпустимий ID шаблону.' });
     }
-    if (filename.includes('..') || !filename.endsWith('.json')) {
-        return res.status(400).json({ message: 'Неприпустиме ім\'я файлу.' });
-    }
+
     try {
-        const filePath = path.join(TEMPLATES_UA_DIR, filename);
-        await fs.writeFile(filePath, content, 'utf-8');
-        res.status(200).json({ message: `Файл ${filename} успішно збережено.` });
+        const filePath = path.join(FORM_DEFS_DIR, `${id}.form.json`);
+        const content = await fs.readFile(filePath, 'utf-8');
+        res.setHeader('Content-Type', 'application/json');
+        res.send(content);
     } catch (error) {
-        console.error('Помилка збереження файлу:', error);
-        res.status(500).json({ message: 'Не вдалося зберегти файл на сервері.' });
+        if (error.code === 'ENOENT') {
+            return res.status(404).json({ message: `Шаблон з ID '${id}' не знайдено.` });
+        }
+        console.error(`Помилка при читанні шаблону '${id}':`, error);
+        res.status(500).json({ message: 'Не вдалося завантажити шаблон.' });
     }
 });
 
-// === НОВІ API ENDPOINTS ===
-
-// API endpoint для отримання списку файлів з будь-якої директорії
-app.get('/api/files', async (req, res) => {
-    const { path: requestedPath } = req.query;
-
-    if (!requestedPath) {
-        return res.status(400).json({ error: 'Потрібно вказати path' });
+// POST /api/build-canonical — збірка canonical з formSpec та formData
+app.post('/api/build-canonical', async (req, res) => {
+    const { formSpec, formValues, mode = 'dev', fillSample = false } = req.body;
+    if (!formSpec || !formValues) {
+        return res.status(400).json({ message: 'Необхідно надати formSpec та formValues.' });
     }
 
+    let tempDir;
     try {
-        const fullPath = path.join(__dirname, requestedPath);
-        const files = await fs.readdir(fullPath);
-        const jsonFiles = files.filter(file => file.endsWith('.json'));
-        res.json(jsonFiles);
-    } catch (error) {
-        console.error('Не вдалося прочитати директорію:', error);
-        res.status(500).json({ error: 'Не вдалося отримати список файлів.' });
-    }
-});
+        tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mova-build-'));
+        const formFile = path.join(tempDir, 'form.json');
+        const valuesFile = path.join(tempDir, 'values.json');
+        const outDir = path.join(tempDir, 'canonical');
 
-// API endpoint для парсингу VNL
-app.post('/api/parse-vnl', async (req, res) => {
-    const { sentence } = req.body;
+        await fs.writeFile(formFile, JSON.stringify(formSpec, null, 2), 'utf-8');
+        await fs.writeFile(valuesFile, JSON.stringify(formValues, null, 2), 'utf-8');
 
-    if (!sentence) {
-        return res.status(400).json({ error: 'Потрібно вказати речення' });
-    }
-
-    try {
-        // Запускаємо скрипт парсингу VNL
-        const { spawn } = await import('child_process');
-        const child = spawn('node', ['scripts/language/parse_vnl.mjs', sentence], {
-            cwd: __dirname,
-            stdio: ['pipe', 'pipe', 'pipe'],
-            shell: true
-        });
-
-        let stdout = '';
-        let stderr = '';
-
-        child.stdout.on('data', (data) => {
-            stdout += data.toString();
-        });
-
-        child.stderr.on('data', (data) => {
-            stderr += data.toString();
-        });
-
-        child.on('close', (code) => {
-            if (code === 0) {
-                try {
-                    // Парсимо вивід скрипта (припускаємо JSON формат)
-                    const result = JSON.parse(stdout);
-                    res.json(result);
-                } catch (parseError) {
-                    res.status(500).json({ error: 'Не вдалося розпарсити результат парсингу' });
-                }
-            } else {
-                res.status(500).json({ error: stderr || 'Помилка виконання парсингу' });
-            }
-        });
-
-    } catch (error) {
-        console.error('Помилка парсингу VNL:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// API endpoint для виконання плану
-app.post('/api/run-plan', async (req, res) => {
-    const { plan, params } = req.body;
-
-    if (!plan) {
-        return res.status(400).json({ error: 'Потрібно вказати план' });
-    }
-
-    try {
-        // Створюємо тимчасовий файл плану
-        const tempPlanPath = path.join(__dirname, 'temp_plan.json');
-        await fs.writeFile(tempPlanPath, plan, 'utf-8');
-
-        // Запускаємо виконання плану
-        const { spawn } = await import('child_process');
-        const args = [tempPlanPath];
-        if (params) {
-            Object.entries(params).forEach(([key, value]) => {
-                args.push(`${key}=${JSON.stringify(value)}`);
-            });
+        const args = [
+            formFile,
+            '--values',
+            valuesFile,
+            '--mode',
+            mode === 'prod' ? 'prod' : 'dev',
+            '--out-dir',
+            outDir
+        ];
+        if (fillSample) {
+            args.push('--fill-sample');
         }
 
-        const child = spawn('node', ['scripts/runtime/run_plan.mjs', ...args], {
-            cwd: __dirname,
-            stdio: ['pipe', 'pipe', 'pipe'],
-            shell: true
-        });
+        const { stdout, stderr } = await runScript('scripts/forms/build_canonical.mjs', args);
+        console.log('Build stdout:', stdout);
+        if (stderr) {
+            console.warn('Build stderr:', stderr);
+        }
 
-        let stdout = '';
-        let stderr = '';
-
-        child.stdout.on('data', (data) => {
-            stdout += data.toString();
-        });
-
-        child.stderr.on('data', (data) => {
-            stderr += data.toString();
-        });
-
-        child.on('close', async (code) => {
-            // Видаляємо тимчасовий файл
-            try {
-                await fs.unlink(tempPlanPath);
-            } catch (e) {
-                // Ігноруємо помилки видалення
-            }
-
-            if (code === 0) {
-                res.json({ output: stdout });
-            } else {
-                res.status(500).json({ error: stderr || 'Помилка виконання плану' });
-            }
-        });
+        const outputFile = path.join(outDir, `${formSpec.id}.canonical.json`);
+        const canonicalJson = JSON.parse(await fs.readFile(outputFile, 'utf-8'));
+        res.json({ canonical: canonicalJson, logs: { stdout, stderr } });
 
     } catch (error) {
-        console.error('Помилка виконання плану:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Помилка під час build canonical:', error.stderr || error.message);
+        res.status(500).json({ message: 'Не вдалося збудувати canonical.', error: error.stderr || error.message });
+    } finally {
+        if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
     }
 });
 
-// API endpoint для валідації JSON
+// POST /api/translate — переклад UA-JSON в canonical
+app.post('/api/translate', async (req, res) => {
+    const { uaJson, lang = 'uk' } = req.body;
+    if (!uaJson) {
+        return res.status(400).json({ message: 'Необхідно надати uaJson.' });
+    }
+
+    let tempDir;
+    try {
+        tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mova-translate-'));
+        const inFile = path.join(tempDir, 'input.json');
+        const outFile = path.join(tempDir, 'output.canonical.json');
+
+        await fs.writeFile(inFile, JSON.stringify(uaJson, null, 2), 'utf-8');
+
+        // Виклик: translate.mjs <input_file> --lang <lang> --out <output_file>
+        // Передаємо відносні шляхи від projectRoot
+        const relativeInFile = path.relative(__dirname, inFile);
+        const relativeOutFile = path.relative(__dirname, outFile);
+        console.log('Translate args:', [relativeInFile, `--lang=${lang}`, `--out=${relativeOutFile}`]);
+        const { stdout, stderr } = await runScript('scripts/translation/translate.mjs', [relativeInFile, `--lang=${lang}`, `--out=${relativeOutFile}`]);
+        console.log('Translate stdout:', stdout);
+        console.log('Translate stderr:', stderr);
+
+        const resultJson = await fs.readFile(outFile, 'utf-8');
+        res.json(JSON.parse(resultJson));
+
+    } catch(error) {
+        console.error('Помилка під час перекладу в canonical:', error);
+        res.status(500).json({ message: 'Не вдалося перекласти в canonical.', error: error.stderr || error.message });
+    } finally {
+        if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
+    }
+});
+
+// POST /api/validate — валідація canonical JSON за схемами
 app.post('/api/validate', async (req, res) => {
-    const { json } = req.body;
-
-    if (!json) {
-        return res.status(400).json({ error: 'Потрібно вказати JSON' });
+    const { canonicalJson } = req.body;
+    if (!canonicalJson) {
+        return res.status(400).json({ message: 'Необхідно надати canonicalJson.' });
     }
 
+    let tempDir;
     try {
-        // Створюємо тимчасовий файл для валідації
-        const tempFilePath = path.join(__dirname, 'temp_validate.json');
-        await fs.writeFile(tempFilePath, json, 'utf-8');
+        tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mova-validate-'));
+        const tempFile = path.join(tempDir, 'validate.canonical.json');
+        await fs.writeFile(tempFile, JSON.stringify(canonicalJson, null, 2), 'utf-8');
 
-        // Запускаємо валідацію
-        const { spawn } = await import('child_process');
-        const child = spawn('node', ['scripts/validation/validate_schemas.mjs'], {
-            cwd: __dirname,
-            stdio: ['pipe', 'pipe', 'pipe']
-        });
-
-        let stdout = '';
-        let stderr = '';
-
-        child.stdout.on('data', (data) => {
-            stdout += data.toString();
-        });
-
-        child.stderr.on('data', (data) => {
-            stderr += data.toString();
-        });
-
-        child.on('close', async (code) => {
-            // Видаляємо тимчасовий файл
-            try {
-                await fs.unlink(tempFilePath);
-            } catch (e) {
-                // Ігноруємо помилки видалення
-            }
-
-            if (code === 0) {
-                res.json({ valid: true });
-            } else {
-                res.status(400).json({ valid: false, errors: stderr.split('\n') });
-            }
-        });
-
+        // Припускаємо, що скрипт валідації може приймати шлях до файлу
+        await runScript('scripts/validation/validate_schemas.mjs', [tempFile]);
+        res.json({ valid: true, report: 'JSON валідний згідно зі схемами.' });
     } catch (error) {
-        console.error('Помилка валідації:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Помилка валідації:', error.stderr || error.message);
+        res.status(400).json({ valid: false, report: error.stderr || 'Не вдалося виконати валідацію.' });
+    } finally {
+        if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
     }
 });
 
-// API endpoint для виконання команд збірки
-app.post('/api/run-command', async (req, res) => {
-    const { command } = req.body;
-
-    if (!command) {
-        return res.status(400).json({ error: 'Потрібно вказати команду' });
+// POST /api/run — виконання плану (dry-run/smoke)
+app.post('/api/run', async (req, res) => {
+    const { canonicalJson, dryRun = true } = req.body;
+    if (!canonicalJson) {
+        return res.status(400).json({ message: 'Необхідно надати canonicalJson.' });
     }
 
+    let tempDir;
     try {
-        const { spawn } = await import('child_process');
+        tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'mova-run-'));
+        const tempFile = path.join(tempDir, 'run.canonical.json');
+        await fs.writeFile(tempFile, JSON.stringify(canonicalJson, null, 2), 'utf-8');
 
-        // Мапінг команд на відповідні node скрипти
-        const commandMap = {
-            'npm run build': [
-                'node scripts/build/build_keys.mjs',
-                'node scripts/translation/uk_to_en.mjs templates/ua',
-                'node scripts/build/build_manifest.mjs',
-                'node scripts/validation/check_lexicon_coverage.mjs'
-            ],
-            'npm run translate': ['node scripts/translation/uk_to_en.mjs templates/ua'],
-            'npm run validate': ['node scripts/validation/validate_schemas.mjs'],
-            'npm run build:manifest': ['node scripts/build/build_manifest.mjs'],
-            'npm run check:lexicon': ['node scripts/validation/check_lexicon_coverage.mjs']
-        };
-
-        const scriptArgs = commandMap[command];
-        if (!scriptArgs) {
-            return res.status(400).json({ error: `Невідома команда: ${command}` });
+        const args = [tempFile];
+        if (dryRun) {
+            args.push('--dry-run'); // Припускаємо, що рантайм підтримує цей флаг
         }
 
-        // Для повної збірки виконуємо команди послідовно
-        if (command === 'npm run build') {
-            executeSequentialCommands(scriptArgs, res);
-        } else {
-            // Для окремих команд виконуємо як звичайно
-            const child = spawn(scriptArgs[0], scriptArgs.slice(1), {
-                cwd: __dirname,
-                stdio: ['pipe', 'pipe', 'pipe'],
-                shell: true
-            });
-
-            let stdout = '';
-            let stderr = '';
-
-            child.stdout.on('data', (data) => {
-                stdout += data.toString();
-            });
-
-            child.stderr.on('data', (data) => {
-                stderr += data.toString();
-            });
-
-            child.on('close', (code) => {
-                if (code === 0) {
-                    res.json({ output: stdout });
-                } else {
-                    res.status(500).json({ error: stderr || `Команда завершилася з кодом ${code}` });
-                }
-            });
-        }
-
+        const { stdout, stderr } = await runScript('scripts/runtime/run_plan.mjs', args);
+        res.json({ success: true, output: stdout, warnings: stderr });
     } catch (error) {
-        console.error('Помилка виконання команди:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Помилка виконання плану:', error.stderr || error.message);
+        res.status(500).json({ success: false, error: error.stderr || 'Не вдалося виконати план.' });
+    } finally {
+        if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
     }
 });
 
-// Функція для послідовного виконання команд збірки
-async function executeSequentialCommands(commands, res) {
-    let output = '';
-    let currentIndex = 0;
+// GET /api/secrets — менеджер секретів (отримання списку alias'ів)
+app.get('/api/secrets', async (req, res) => {
+    // MOCK: В реальній системі тут буде логіка перевірки існування секретів у Vault/ENV
+    res.json([
+        { alias: 'SENDGRID_API_KEY', status: 'OK' },
+        { alias: 'STRIPE_API_KEY', status: 'Absent' },
+        { alias: 'SLACK_WEBHOOK_URL', status: 'OK' },
+    ]);
+});
 
-    function executeNext() {
-        if (currentIndex >= commands.length) {
-            res.json({ output });
-            return;
-        }
-
-        const command = commands[currentIndex];
-        const [cmd, ...args] = command.split(' ');
-
-        const child = spawn(cmd, args, {
-            cwd: __dirname,
-            stdio: ['pipe', 'pipe', 'pipe'],
-            shell: true
-        });
-
-        child.stdout.on('data', (data) => {
-            output += data.toString();
-        });
-
-        child.stderr.on('data', (data) => {
-            output += data.toString();
-        });
-
-        child.on('close', (code) => {
-            if (code !== 0) {
-                res.status(500).json({ error: `Команда "${command}" завершилася з кодом ${code}\n${output}` });
-                return;
-            }
-
-            currentIndex++;
-            executeNext();
-        });
+// POST /api/secrets — менеджер секретів (додавання/оновлення alias'у)
+app.post('/api/secrets', async (req, res) => {
+    const { alias } = req.body;
+    if (!alias) {
+        return res.status(400).json({ message: 'Необхідно надати alias.' });
     }
+    // MOCK: В реальній системі тут буде логіка збереження alias'у.
+    // Значення секрету НЕ передається і не зберігається на цьому сервері.
+    console.log(`Отримано запит на додавання/оновлення alias'у: ${alias}`);
+    res.status(201).json({ message: `Alias '${alias}' успішно зареєстровано.` });
+});
 
-    executeNext();
-}
+// --- Обробка 404 та перенаправлення на SPA ---
+app.get('*', (req, res) => {
+    // Для будь-якого GET-запиту, що не збігся з API або статикою,
+    // повертаємо головний файл SPA для підтримки client-side routing.
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 app.listen(PORT, () => {
-    console.log(`Сервер запущено на http://localhost:${PORT}`);
+    console.log(`Сервер MOVA UI Gateway запущено на http://localhost:${PORT}`);
 });

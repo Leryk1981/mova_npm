@@ -47,6 +47,42 @@ function interpolateDeep(data, context) {
   return data; // Return numbers, booleans, etc. as is.
 }
 
+function isSecretReference(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) && Object.prototype.hasOwnProperty.call(value, '$secret');
+}
+
+function resolveSecretReference(secretRef) {
+  const alias = secretRef.$secret;
+  if (typeof alias !== 'string' || alias.trim().length === 0) {
+    throw new Error('Secret reference must provide a non-empty $secret alias.');
+  }
+  const mode = secretRef.as === 'bearer' ? 'bearer' : 'raw';
+  const secretValue = process.env[alias];
+  if (secretValue === undefined) {
+    throw new Error(`Secret alias "${alias}" is not available in the execution environment.`);
+  }
+  if (mode === 'bearer') {
+    return `Bearer ${secretValue}`;
+  }
+  return secretValue;
+}
+
+function hydrateSecrets(value) {
+  if (Array.isArray(value)) {
+    return value.map(item => hydrateSecrets(item));
+  }
+  if (isSecretReference(value)) {
+    return resolveSecretReference(value);
+  }
+  if (value && typeof value === 'object') {
+    const result = {};
+    for (const [key, val] of Object.entries(value)) {
+      result[key] = hydrateSecrets(val);
+    }
+    return result;
+  }
+  return value;
+}
 let planRegistry = null;
 function getPlanRegistry() {
   if (!planRegistry) {
@@ -181,12 +217,13 @@ async function runPlan(planPath, initialParams = {}) {
       },
       'http:request': async (payload) => {
         const { url, method, headers, body, result_in } = payload; // Already interpolated
-        const requestHeaders = { ...(headers || {}) };
-        if (body !== undefined) {
-          requestHeaders['Content-Type'] = envelopePayloadMediaType;
+        const resolvedHeaders = hydrateSecrets(headers || {});
+        const resolvedBody = body === undefined ? undefined : hydrateSecrets(body);
+        const requestHeaders = { ...resolvedHeaders };
+        if (resolvedBody !== undefined && !Object.prototype.hasOwnProperty.call(requestHeaders, 'Content-Type')) {
+          requestHeaders['Content-Type'] = 'application/json';
         }
-        const requestBody = body === undefined ? undefined : (typeof body === 'string' ? body : JSON.stringify(body));
-        console.log(`[ENGINE] Making ${method} request to ${url}`);
+        const requestBody = resolvedBody === undefined ? undefined : (typeof resolvedBody === 'string' ? resolvedBody : JSON.stringify(resolvedBody));
         try {
           const response = await fetch(url, {
             method: method,
@@ -330,6 +367,9 @@ for (const arg of paramsArgs) {
 if (process.argv[1].endsWith('run_plan.mjs')) {
   runPlan(planFile, initialParams);
 }
+
+
+
 
 
 

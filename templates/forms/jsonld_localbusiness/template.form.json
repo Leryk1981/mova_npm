@@ -1,0 +1,215 @@
+{
+  "id": "jsonld_localbusiness",
+  "i18n": {
+    "title": {
+      "uk": "Створити JSON-LD LocalBusiness"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      }
+    },
+    "fields": {
+      "BUSINESS_NAME": {
+        "uk": "Назва бізнесу"
+      },
+      "STREET_ADDRESS": {
+        "uk": "Вулиця"
+      },
+      "ADDRESS_LOCALITY": {
+        "uk": "Місто"
+      },
+      "ADDRESS_REGION": {
+        "uk": "Регіон"
+      },
+      "POSTAL_CODE": {
+        "uk": "Поштовий код"
+      },
+      "ADDRESS_COUNTRY": {
+        "uk": "Країна"
+      },
+      "TELEPHONE": {
+        "uk": "Телефон"
+      },
+      "OPENING_HOURS_ARRAY": {
+        "uk": "Години роботи (масив)"
+      },
+      "URL": {
+        "uk": "URL сайту"
+      },
+      "LOGO_URL": {
+        "uk": "URL логотипу"
+      },
+      "OUT_FILE": {
+        "uk": "Файл для виводу"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "BUSINESS_NAME",
+          "type": "text",
+          "required": true,
+          "sample": "MOVA Bakery"
+        },
+        {
+          "key": "STREET_ADDRESS",
+          "type": "text",
+          "required": true,
+          "sample": "123 Main St"
+        },
+        {
+          "key": "ADDRESS_LOCALITY",
+          "type": "text",
+          "required": true,
+          "sample": "Kyiv"
+        },
+        {
+          "key": "ADDRESS_REGION",
+          "type": "text",
+          "required": true,
+          "sample": "Kyiv Oblast"
+        },
+        {
+          "key": "POSTAL_CODE",
+          "type": "text",
+          "required": true,
+          "sample": "01001"
+        },
+        {
+          "key": "ADDRESS_COUNTRY",
+          "type": "text",
+          "required": true,
+          "sample": "UA"
+        },
+        {
+          "key": "TELEPHONE",
+          "type": "tel",
+          "required": true,
+          "sample": "+380441234567"
+        },
+        {
+          "key": "OPENING_HOURS_ARRAY",
+          "type": "textarea",
+          "required": true,
+          "sample": "[\"Mo-Fr 09:00-18:00\"]"
+        },
+        {
+          "key": "URL",
+          "type": "url",
+          "required": true,
+          "sample": "https://mova.example.com"
+        },
+        {
+          "key": "LOGO_URL",
+          "type": "url",
+          "required": true,
+          "sample": "https://mova.example.com/logo.png"
+        },
+        {
+          "key": "OUT_FILE",
+          "type": "text",
+          "required": false,
+          "default": "dist/seo/localbusiness.jsonld"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "payload_media_type": "application/ld+json",
+    "$comment": "JSON-LD LocalBusiness: базовий SEO профіль локального бізнесу.",
+    "payload": {
+      "@context": {
+        "@vocab": "https://schema.org/",
+        "@language": "uk"
+      },
+      "@type": "LocalBusiness",
+      "name": "",
+      "url": "",
+      "logo": "",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "",
+        "addressLocality": "",
+        "addressRegion": "",
+        "postalCode": "",
+        "addressCountry": ""
+      },
+      "telephone": "",
+      "openingHours": []
+    },
+    "actions": [
+      {
+        "type": "file_write",
+        "path": "",
+        "data": "${payload}"
+      },
+      {
+        "type": "print",
+        "message": "JSON-LD LocalBusiness збережено"
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "BUSINESS_NAME",
+      "to": "/payload/name",
+      "severity": "error"
+    },
+    {
+      "from": "URL",
+      "to": "/payload/url",
+      "severity": "error"
+    },
+    {
+      "from": "LOGO_URL",
+      "to": "/payload/logo",
+      "severity": "error"
+    },
+    {
+      "from": "STREET_ADDRESS",
+      "to": "/payload/address/streetAddress",
+      "severity": "error"
+    },
+    {
+      "from": "ADDRESS_LOCALITY",
+      "to": "/payload/address/addressLocality",
+      "severity": "error"
+    },
+    {
+      "from": "ADDRESS_REGION",
+      "to": "/payload/address/addressRegion",
+      "severity": "error"
+    },
+    {
+      "from": "POSTAL_CODE",
+      "to": "/payload/address/postalCode",
+      "severity": "error"
+    },
+    {
+      "from": "ADDRESS_COUNTRY",
+      "to": "/payload/address/addressCountry",
+      "severity": "error"
+    },
+    {
+      "from": "TELEPHONE",
+      "to": "/payload/telephone",
+      "severity": "error"
+    },
+    {
+      "from": "OPENING_HOURS_ARRAY",
+      "to": "/payload/openingHours",
+      "transform": "json",
+      "severity": "error"
+    },
+    {
+      "from": "OUT_FILE",
+      "to": "/actions/0/path",
+      "severity": "warn"
+    }
+  ]
+}

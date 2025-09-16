@@ -1,0 +1,6 @@
+{
+  "SPREADSHEET_ID": "1abc...xyz",
+  "RANGE": "Sheet1!A1:D1",
+  "ROW_DATA_JSON": "{\"values\": [[\"Name\", \"Email\", \"2024-01-01\"]]}",
+  "SHEETS_API_KEY_NAME": "GOOGLE_SHEETS_TOKEN"
+}

@@ -1,0 +1,39 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "secrets.get",
+      "name": "GOOGLE_SHEETS_TOKEN",
+      "out": "api_key"
+    },
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}:append?valueInputOption=RAW",
+        "method": "POST",
+        "headers": {
+          "Authorization": "",
+          "Content-Type": "application/json"
+        },
+        "body": ""
+      },
+      "headers": {
+        "Authorization": {
+          "$secret": "GOOGLE_SHEETS_TOKEN",
+          "as": "bearer"
+        }
+      },
+      "url": "Sheet1!A1:D1",
+      "body": {
+        "values": [
+          [
+            "Name",
+            "Email",
+            "2024-01-01"
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "id": "shopify_orders",
+  "i18n": {
+    "title": {
+      "uk": "Отримати замовлення з Shopify"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      },
+      "security": {
+        "uk": "Безпека"
+      }
+    },
+    "fields": {
+      "BASE_URL": {
+        "uk": "Базовий URL магазину"
+      },
+      "STATUS": {
+        "uk": "Статус замовлень"
+      },
+      "AFTER_ISO": {
+        "uk": "Після дати (ISO)"
+      },
+      "OUT_FILE": {
+        "uk": "Файл для виводу"
+      },
+      "CK_SECRET_NAME": {
+        "uk": "Alias Consumer Key"
+      },
+      "CS_SECRET_NAME": {
+        "uk": "Alias Consumer Secret"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "BASE_URL",
+          "type": "url",
+          "required": true,
+          "sample": "https://shop.example.com"
+        },
+        {
+          "key": "STATUS",
+          "type": "text",
+          "required": false,
+          "default": "any"
+        },
+        {
+          "key": "AFTER_ISO",
+          "type": "text",
+          "required": false,
+          "default": "2024-01-01T00:00:00Z"
+        },
+        {
+          "key": "OUT_FILE",
+          "type": "text",
+          "required": false,
+          "default": "out/shopify_orders.ndjson"
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "fields": [
+        {
+          "key": "CK_SECRET_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "WC_CONSUMER_KEY"
+        },
+        {
+          "key": "CS_SECRET_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "WC_CONSUMER_SECRET"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "actions": [
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "ck"
+      },
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "cs"
+      },
+      {
+        "type": "http_request",
+        "invoke": "http:request",
+        "payload": {
+          "url": "${BASE_URL}/admin/api/2023-10/orders.json?status=${STATUS}&created_at_min=${AFTER_ISO}",
+          "method": "GET",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Basic ${base64.encode(ck + ':' + cs)}"
+          }
+        }
+      },
+      {
+        "type": "file_write",
+        "path": "",
+        "data": "${response.body}"
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "CK_SECRET_NAME",
+      "to": "/actions/0/name",
+      "severity": "error"
+    },
+    {
+      "from": "CS_SECRET_NAME",
+      "to": "/actions/1/name",
+      "severity": "error"
+    },
+    {
+      "from": "BASE_URL",
+      "to": "/actions/2/payload/url",
+      "severity": "error"
+    },
+    {
+      "from": "STATUS",
+      "to": "/actions/2/payload/url",
+      "severity": "warn"
+    },
+    {
+      "from": "AFTER_ISO",
+      "to": "/actions/2/payload/url",
+      "severity": "warn"
+    },
+    {
+      "from": "OUT_FILE",
+      "to": "/actions/3/path",
+      "severity": "warn"
+    }
+  ]
+}

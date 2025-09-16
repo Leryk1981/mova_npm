@@ -1,57 +1,17 @@
 {
   "name": "mova",
   "version": "0.1.0",
-  "description": "UA JSON Language for MOVA",
+  "description": "No-Code Automation Platform for MOVA",
   "type": "module",
   "scripts": {
     "build:keys": "node scripts/build/build_keys.mjs",
-    "check:lexicon": "node scripts/validation/check_lexicon_coverage.mjs",
-
-    "lint:ua": "node scripts/validation/lint_templates.mjs templates/ua && node scripts/validation/no_placeholders.mjs templates/ua",
-    "lint:de": "node scripts/validation/lint_templates.mjs templates/de && node scripts/validation/no_placeholders.mjs templates/de",
-    "lint:fr": "node scripts/validation/lint_templates.mjs templates/fr && node scripts/validation/no_placeholders.mjs templates/fr",
-    "lint:pl": "node scripts/validation/lint_templates.mjs templates/pl && node scripts/validation/no_placeholders.mjs templates/pl",
-
-    "translate:ua": "node scripts/translation/translate.mjs templates/ua --lang=uk",
-    "translate:de": "node scripts/translation/translate.mjs templates/de --lang=de",
-    "translate:fr": "node scripts/translation/translate.mjs templates/fr --lang=fr",
-    "translate:pl": "node scripts/translation/translate.mjs templates/pl --lang=pl",
-
-    "validate:canonical": "node scripts/validation/validate_schemas.mjs templates/canonical",
-
-    "build:all": "npm run build:keys && npm run check:lexicon && npm run lint:ua && npm run lint:de && npm run lint:fr && npm run lint:pl && npm run translate:ua && npm run translate:de && npm run translate:fr && npm run translate:pl && npm run validate:canonical",
-    "build:all:with-de": "npm run build:keys && npm run check:lexicon && npm run lint:ua && npm run lint:de && npm run lint:fr && npm run lint:pl && npm run translate:ua && npm run translate:de && npm run translate:fr && npm run translate:pl && npm run validate:canonical",
-
-    "scaffold:shopify:orders": "node scripts/scaffold.mjs templates/blank/ua/shopify_orders_blank.json templates/ua/shopify_orders.json",
-    "scaffold:jsonld:event": "node scripts/scaffold.mjs templates/blank/ua/envelope_jsonld_event_blank.json templates/ua/event.json",
-
-    "scaffold:webhook:shopify": "node scripts/scaffold.mjs templates/blank/ua/webhook_shopify_orders_create_route_blank.json templates/ua/webhook_shopify_orders_create_route.json WEBHOOK_PATH=/webhooks/shopify/orders/create WEBHOOK_SECRET_NAME=SHOPIFY_WEBHOOK_SECRET OUT_FILE=out/shopify_orders.ndjson",
-    "scaffold:stripe:pi": "node scripts/scaffold.mjs templates/blank/ua/stripe_payment_intent_create_blank.json templates/ua/stripe_payment_intent_create.json AMOUNT_MINOR=2500 CURRENCY=EUR DESCRIPTION='Test order' STRIPE_KEY_NAME=STRIPE_API_KEY",
-    "scaffold:sendgrid:mail": "node scripts/scaffold.mjs templates/blank/ua/sendgrid_send_mail_blank.json templates/ua/sendgrid_send_mail.json FROM_EMAIL=you@example.com TO_EMAILS=client@example.com SUBJECT='Hi' PLAIN_TEXT='Hello' HTML_CONTENT='<b>Hello</b>' SG_KEY_NAME=SENDGRID_API_KEY",
-
-    "scaffold:slack:message": "node scripts/scaffold.mjs templates/blank/ua/slack_send_message_blank.json templates/ua/slack_send_message.json SLACK_WEBHOOK_NAME=SLACK_WEBHOOK_URL MESSAGE_TEXT='Hello from MOVA!' CHANNEL='#general' USERNAME='MOVA Bot' ICON_EMOJI=':robot_face:'",
-    "scaffold:sheets:append": "node scripts/scaffold.mjs templates/blank/ua/google_sheets_append_blank.json templates/ua/google_sheets_append.json SHEETS_API_KEY_NAME=GOOGLE_SHEETS_TOKEN SPREADSHEET_ID=your_spreadsheet_id RANGE=Sheet1!A:B ROW_DATA_JSON='{\"values\": [[\"Name\", \"Email\", \"2024-01-01\"]]}'",
-    "scaffold:telegram:message": "node scripts/scaffold.mjs templates/blank/ua/telegram_send_message_blank.json templates/ua/telegram_send_message.json TELEGRAM_BOT_TOKEN_NAME=TELEGRAM_BOT_TOKEN CHAT_ID=123456789 MESSAGE_TEXT='Hello from MOVA!' PARSE_MODE='HTML' DISABLE_PREVIEW='false'",
-
-    "scaffold:discord:message": "node scripts/scaffold.mjs templates/blank/ua/discord_send_message_blank.json templates/ua/discord_send_message.json DISCORD_WEBHOOK_SECRET_NAME=DISCORD_WEBHOOK_URL CONTENT='Hello from MOVA!' USERNAME='MOVA Bot' AVATAR_URL='https://example.com/avatar.png'",
-    "scaffold:woo:orders": "node scripts/scaffold.mjs templates/blank/ua/woocommerce_orders_list_blank.json templates/ua/woocommerce_orders_list.json BASE_URL='https://yourstore.example.com' CK_SECRET_NAME=WC_CONSUMER_KEY CS_SECRET_NAME=WC_CONSUMER_SECRET STATUS='any' AFTER_ISO='2024-01-01T00:00:00Z' OUT_FILE='out/wc_orders.ndjson'",
-    "scaffold:jsonld:localbiz": "node scripts/scaffold.mjs templates/blank/ua/jsonld_localbusiness_blank.json templates/ua/jsonld_localbusiness.json BUSINESS_NAME='My Business' STREET_ADDRESS='123 Main St' ADDRESS_LOCALITY='City' ADDRESS_REGION='State' POSTAL_CODE='12345' ADDRESS_COUNTRY='UA' TELEPHONE='+380123456789' OPENING_HOURS_ARRAY='Mo-Fr 09:00-18:00,Sa 10:00-14:00' URL='https://example.com' LOGO_URL='https://example.com/logo.png' OUT_FILE='dist/seo/localbusiness.jsonld'",
-
-    "scaffold:discord:message:de": "node scripts/scaffold.mjs templates/blank/de/discord_send_message_blank.json templates/de/discord_send_message.json DISCORD_WEBHOOK_SECRET_NAME=DISCORD_WEBHOOK_URL CONTENT='Hello from MOVA!' USERNAME='MOVA Bot' AVATAR_URL='https://example.com/avatar.png'",
-    "scaffold:discord:message:fr": "node scripts/scaffold.mjs templates/blank/fr/discord_send_message_blank.json templates/fr/discord_send_message.json DISCORD_WEBHOOK_SECRET_NAME=DISCORD_WEBHOOK_URL CONTENT='Hello from MOVA!' USERNAME='MOVA Bot' AVATAR_URL='https://example.com/avatar.png'",
-    "scaffold:discord:message:pl": "node scripts/scaffold.mjs templates/blank/pl/discord_send_message_blank.json templates/pl/discord_send_message.json DISCORD_WEBHOOK_SECRET_NAME=DISCORD_WEBHOOK_URL CONTENT='Hello from MOVA!' USERNAME='MOVA Bot' AVATAR_URL='https://example.com/avatar.png'",
-
-    "scaffold:woo:orders:de": "node scripts/scaffold.mjs templates/blank/de/woocommerce_orders_list_blank.json templates/de/woocommerce_orders_list.json BASE_URL='https://yourstore.example.com' CK_SECRET_NAME=WC_CONSUMER_KEY CS_SECRET_NAME=WC_CONSUMER_SECRET STATUS='any' AFTER_ISO='2024-01-01T00:00:00Z' OUT_FILE='out/wc_orders.ndjson'",
-    "scaffold:woo:orders:fr": "node scripts/scaffold.mjs templates/blank/fr/woocommerce_orders_list_blank.json templates/fr/woocommerce_orders_list.json BASE_URL='https://yourstore.example.com' CK_SECRET_NAME=WC_CONSUMER_KEY CS_SECRET_NAME=WC_CONSUMER_SECRET STATUS='any' AFTER_ISO='2024-01-01T00:00:00Z' OUT_FILE='out/wc_orders.ndjson'",
-    "scaffold:woo:orders:pl": "node scripts/scaffold.mjs templates/blank/pl/woocommerce_orders_list_blank.json templates/pl/woocommerce_orders_list.json BASE_URL='https://yourstore.example.com' CK_SECRET_NAME=WC_CONSUMER_KEY CS_SECRET_NAME=WC_CONSUMER_SECRET STATUS='any' AFTER_ISO='2024-01-01T00:00:00Z' OUT_FILE='out/wc_orders.ndjson'",
-
-    "scaffold:jsonld:localbiz:de": "node scripts/scaffold.mjs templates/blank/de/jsonld_localbusiness_blank.json templates/de/jsonld_localbusiness.json BUSINESS_NAME='My Business' STREET_ADDRESS='123 Main St' ADDRESS_LOCALITY='City' ADDRESS_REGION='State' POSTAL_CODE='12345' ADDRESS_COUNTRY='UA' TELEPHONE='+380123456789' OPENING_HOURS_ARRAY='Mo-Fr 09:00-18:00,Sa 10:00-14:00' URL='https://example.com' LOGO_URL='https://example.com/logo.png' OUT_FILE='dist/seo/localbusiness.jsonld'",
-    "scaffold:jsonld:localbiz:fr": "node scripts/scaffold.mjs templates/blank/fr/jsonld_localbusiness_blank.json templates/fr/jsonld_localbusiness.json BUSINESS_NAME='My Business' STREET_ADDRESS='123 Main St' ADDRESS_LOCALITY='City' ADDRESS_REGION='State' POSTAL_CODE='12345' ADDRESS_COUNTRY='UA' TELEPHONE='+380123456789' OPENING_HOURS_ARRAY='Mo-Fr 09:00-18:00,Sa 10:00-14:00' URL='https://example.com' LOGO_URL='https://example.com/logo.png' OUT_FILE='dist/seo/localbusiness.jsonld'",
-    "scaffold:jsonld:localbiz:pl": "node scripts/scaffold.mjs templates/blank/pl/jsonld_localbusiness_blank.json templates/pl/jsonld_localbusiness.json BUSINESS_NAME='My Business' STREET_ADDRESS='123 Main St' ADDRESS_LOCALITY='City' ADDRESS_REGION='State' POSTAL_CODE='12345' ADDRESS_COUNTRY='UA' TELEPHONE='+380123456789' OPENING_HOURS_ARRAY='Mo-Fr 09:00-18:00,Sa 10:00-14:00' URL='https://example.com' LOGO_URL='https://example.com/logo.png' OUT_FILE='dist/seo/localbusiness.jsonld'",
-
-    "ua:to:canonical": "node scripts/translation/translate.mjs templates/ua ua",
-    "validate:canonical": "node scripts/validation/validate_schemas.mjs",
-
+    "forms:lint": "node scripts/forms/validate_form_spec.mjs templates/forms && node scripts/forms/lint_bindings.mjs templates/forms",
+    "forms:build:dev": "node scripts/forms/build_canonical.mjs templates/forms --mode=dev --fill-sample",
+    "forms:build:prod": "node scripts/forms/build_canonical.mjs templates/forms --mode=prod",
+    "validate:canonical": "node scripts/validation/validate_canonical.mjs",
+    "smoke": "node scripts/run/smoke.mjs templates/canonical",
+    "build:all": "npm run forms:lint && npm run forms:build:dev && npm run validate:canonical && npm run smoke",
+    "release:check": "npm run forms:lint && npm run forms:build:prod && npm run validate:canonical && npm run smoke",
     "start:ui": "node server.js",
     "run": "node scripts/runtime/run_plan.mjs",
     "cli": "node cli.mjs"
@@ -61,6 +21,7 @@
   "dependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "cors": "^2.8.5",
     "express": "^4.21.2"
   },
   "devDependencies": {

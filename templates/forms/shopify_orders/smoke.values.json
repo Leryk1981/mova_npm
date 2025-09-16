@@ -1,0 +1,8 @@
+{
+  "BASE_URL": "https://shop.example.com",
+  "STATUS": "any",
+  "AFTER_ISO": "2024-01-01T00:00:00Z",
+  "OUT_FILE": "out/shopify_orders.ndjson",
+  "CK_SECRET_NAME": "WC_CONSUMER_KEY",
+  "CS_SECRET_NAME": "WC_CONSUMER_SECRET"
+}

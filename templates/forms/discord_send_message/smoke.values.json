@@ -1,0 +1,6 @@
+{
+  "CONTENT": "Hello from MOVA!",
+  "USERNAME": "MOVA Bot",
+  "AVATAR_URL": "https://example.com/avatar.png",
+  "DISCORD_WEBHOOK_SECRET_NAME": "DISCORD_WEBHOOK_URL"
+}

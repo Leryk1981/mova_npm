@@ -109,9 +109,9 @@ jsonFiles.forEach(fileName => {
     writeFileSync(outputFullPath, JSON.stringify(ukJson, null, 2), 'utf-8');
       console.log(`✅ ${join(inputDirRelativePath, fileName)} -> ${join('templates/ua/from-en', subDir, outputFilename)}`);
   } catch (error) {
-    console.error(`❌ Помилка під час обробки файлу ${inputFileRelativePath}:`);
-    console.error(error);
-  }
+   console.error(`❌ Помилка під час обробки файлу ${fileName}:`);
+   console.error(error);
+ }
 });
 
 console.log('--- Переклад завершено ---');

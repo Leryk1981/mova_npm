@@ -7,9 +7,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, '../..');
 
-const inputPathArg = process.argv[2];
-const langArg = process.argv[3];
-const outputPathArg = process.argv[4];
+let inputPathArg, langArg, outputPathArg;
+
+for (let i = 2; i < process.argv.length; i++) {
+  const arg = process.argv[i];
+  if (arg.startsWith('--lang=')) {
+    langArg = arg;
+  } else if (arg.startsWith('--out=')) {
+    outputPathArg = arg.split('=')[1];
+  } else if (!inputPathArg) {
+    inputPathArg = arg;
+  }
+}
 
 if (!inputPathArg) {
   console.error('❌ Помилка: Будь ласка, вкажіть шлях до файлу або директорії з мовними шаблонами.');
@@ -57,6 +66,8 @@ if (!existsSync(allowlistPath)) {
 
 const lexicon = JSON.parse(readFileSync(lexiconPath, 'utf-8'));
 const allowlist = new Set(JSON.parse(readFileSync(allowlistPath, 'utf-8')));
+console.log('Allowlist has http_запит:', allowlist.has('http_запит'));
+console.log('Lexicon http_запит:', lexicon['http_запит']);
 
 // Рекурсивна функція для пошуку всіх .json файлів
 function findJsonFiles(startPath) {

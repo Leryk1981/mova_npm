@@ -1,14 +1,22 @@
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-// Import the specific constructor for JSON Schema 2020-12
-import Ajv2020 from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
+// Використовуємо спільну фабрику Ajv для JSON Schema 2020-12
+import { createAjv } from '../lib/createAjv.mjs';
 
 // --- Налаштування ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const projectRoot = resolve(__dirname, '../..');
+
+let inputPathArg;
+
+for (let i = 2; i < process.argv.length; i++) {
+  const arg = process.argv[i];
+  if (!inputPathArg) {
+    inputPathArg = arg;
+  }
+}
 
 // --- Рекурсивний пошук файлів схем ---
 function findJsonFiles(dir) {
@@ -56,17 +64,10 @@ for (const schemaPath of schemaFilePaths) {
   }
 }
 
-// Спочатку створюємо екземпляр Ajv. Він має автоматично завантажити мета-схему 2020-12.
-const ajv = new Ajv2020({
-  allErrors: true,
-  discriminator: true,
-  validateSchema: false, // Оптимізація: ми довіряємо власним схемам
-  strict: false, // Послаблюємо строгий режим, щоб уникнути попереджень про `oneOf` з різними типами
-});
+// Створюємо екземпляр Ajv через спільну фабрику (draft 2020-12).
+const ajv = createAjv({ validateSchema: false });
 // Потім додаємо всі наші схеми. Це також їх скомпілює.
 ajv.addSchema(allSchemas);
-
-addFormats(ajv);
 
 let hasErrors = false;
 
@@ -102,56 +103,65 @@ function validateFile(dataPath, schemaPath) {
   }
 }
 
-// --- Запуск валідації для всіх файлів ---
-console.log('--- Початок валідації канонічних файлів ---');
+// --- Запуск валідації ---
+console.log('--- Початок валідації ---');
 
-const canonicalDirs = [
-  { label: 'canonical', dir: resolve(projectRoot, 'canonical') },
-  { label: 'templates/canonical', dir: resolve(projectRoot, 'templates/canonical') }
-];
+if (inputPathArg) {
+  // Валідація одного файлу
+  const dataPath = inputPathArg;
+  const schemaPath = 'schemas/core/envelope.3.3.schema.json'; // За замовчуванням envelope схема
+  validateFile(dataPath, schemaPath);
+} else {
+  // Валідація всіх файлів у канонічних директоріях
+  const canonicalDirs = [
+    { label: 'canonical', dir: resolve(projectRoot, 'canonical') },
+    { label: 'templates/canonical', dir: resolve(projectRoot, 'templates/canonical') }
+  ];
 
-let validatedFiles = 0;
+  let validatedFiles = 0;
 
-for (const { label, dir } of canonicalDirs) {
-  try {
-    const files = readdirSync(dir).filter(f => f.endsWith('.json'));
+  for (const { label, dir } of canonicalDirs) {
+    try {
+      const files = readdirSync(dir).filter(f => f.endsWith('.json'));
 
-    if (files.length === 0) {
-      console.warn(`⚠️  Не знайдено жодного .json файлу в директорії ${label} для валідації.`);
-      continue;
-    }
-
-    for (const fileName of files) {
-      if (fileName === 'manifest.json') continue; // Ignore the manifest file
-
-      let schemaName;
-      if (fileName.includes('route') || fileName.includes('маршрут')) {
-        schemaName = 'core/route.1.0.schema.json';
-      } else if (fileName.includes('plan') || fileName.includes('envelope') || fileName.includes('план')) {
-        schemaName = 'core/envelope.3.3.schema.json';
+      if (files.length === 0) {
+        console.warn(`⚠️  Не знайдено жодного .json файлу в директорії ${label} для валідації.`);
+        continue;
       }
 
-      if (schemaName) {
-        const dataPath = join(label, fileName);
-        const schemaPath = join('schemas', schemaName);
-        validateFile(dataPath, schemaPath);
-        validatedFiles += 1;
+      for (const fileName of files) {
+        if (fileName === 'manifest.json') continue; // Ignore the manifest file
+
+        let schemaName;
+        if (fileName.includes('route') || fileName.includes('маршрут')) {
+          schemaName = 'core/route.1.0.schema.json';
+        } else {
+          // По умолчанию используем envelope схему для всех остальных файлов
+          schemaName = 'core/envelope.3.3.schema.json';
+        }
+
+        if (schemaName) {
+          const dataPath = join(label, fileName);
+          const schemaPath = join('schemas', schemaName);
+          validateFile(dataPath, schemaPath);
+          validatedFiles += 1;
+        } else {
+          console.warn(`⚠️  Не знайдено відповідної схеми для файлу: ${fileName}`);
+        }
+      }
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        console.warn(`⚠️  Директорія '${label}' не існує, валідацію пропущено.`);
       } else {
-        console.warn(`⚠️  Не знайдено відповідної схеми для файлу: ${fileName}`);
+        console.error(`💥 Не вдалося прочитати директорію ${label}:`, error);
+        hasErrors = true;
       }
-    }
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      console.warn(`⚠️  Директорія '${label}' не існує, валідацію пропущено.`);
-    } else {
-      console.error(`💥 Не вдалося прочитати директорію ${label}:`, error);
-      hasErrors = true;
     }
   }
-}
 
-if (validatedFiles === 0) {
-  console.warn('⚠️  Не знайдено канонічних файлів для валідації.');
+  if (validatedFiles === 0) {
+    console.warn('⚠️  Не знайдено канонічних файлів для валідації.');
+  }
 }
 console.log('\n--- Валідацію завершено ---');
 
@@ -161,4 +171,6 @@ if (hasErrors) {
 } else {
   console.log('\n🎉 Усі канонічні файли успішно провалідовано!');
 }
+
+
 

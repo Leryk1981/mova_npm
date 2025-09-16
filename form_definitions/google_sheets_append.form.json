@@ -1,0 +1,38 @@
+{
+  "id": "google_sheets_append",
+  "title": "Google Sheets — додавання рядка",
+  "category": "storage",
+  "lang": "uk",
+  "source": "templates/blank/ua/google_sheets_append_blank.json",
+  "output": "templates/ua/google_sheets_append.json",
+  "sections": [
+    {
+      "title": "Таблиця",
+      "fields": [
+        { "key": "SPREADSHEET_ID", "label": "ID таблиці", "type": "text", "required": true, "placeholder": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms" },
+        { "key": "RANGE", "label": "Діапазон", "type": "text", "required": true, "placeholder": "Sheet1!A:B", "default": "Sheet1!A:Z" }
+      ]
+    },
+    {
+      "title": "Дані",
+      "fields": [
+        { "key": "VALUES", "label": "Значення (JSON масив)", "type": "textarea", "required": true, "placeholder": "[\"значення1\", \"значення2\"]" }
+      ]
+    },
+    {
+      "title": "Безпека",
+      "fields": [
+        { "key": "GOOGLE_API_KEY", "label": "Alias секрету API ключа", "type": "secret-alias", "required": true, "default": "GOOGLE_API_KEY" }
+      ]
+    }
+  ],
+  "mapping": {
+    "SPREADSHEET_ID": "<SPREADSHEET_ID>",
+    "RANGE": "<RANGE>",
+    "VALUES": "<VALUES>",
+    "GOOGLE_API_KEY": "<GOOGLE_API_KEY>"
+  },
+  "actions": {
+    "onComplete": ["scaffold", "translate", "validate", "run"]
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/actions/return.schema.json",
   "title": "Action: Return",
   "description": "Схема для дії, що завершує виконання плану і повертає значення.",

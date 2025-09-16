@@ -1,0 +1,21 @@
+{
+  "версія": "3.3",
+  "id": "mova.browser_input.atomic",
+  "опис": "Atomic call for mova.browser_input",
+  "політики": {
+    "таймаут_мс": 10000,
+    "повтор": {
+      "max_attempts": 1
+    }
+  },
+  "дії": [
+    {
+      "тип": "генерувати_подію",
+      "канал": "mova.browser_input",
+      "навантаження": {
+        "текст": "${text}",
+        "press_enter": "${press_enter}"
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "версія": "3.3",
+  "$comment": "Discord: повідомлення через Incoming Webhook.",
+  "дії": [
+    {
+      "тип": "отримати_секрет",
+      "name": "<DISCORD_WEBHOOK_SECRET_NAME>",
+      "out": "discord_webhook_url"
+    },
+    {
+      "тип": "http_запит",
+      "invoke": "http:request",
+      "payload": {
+        "url": "{+discord_webhook_url}",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "content": "<CONTENT>",
+          "username": "<USERNAME>",
+          "avatar_url": "<AVATAR_URL>"
+        },
+        "result_in": "vars.resp"
+      }
+    },
+    {
+      "тип": "print",
+      "message": "Discord accepted (status in vars.resp.__status)"
+    }
+  ]
+}

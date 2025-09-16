@@ -1,5 +1,5 @@
  {
-  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/actions/read_file.schema.json",
   "title": "Action: Read File",
   "description": "Схема для дії, що читає вміст файлу.",

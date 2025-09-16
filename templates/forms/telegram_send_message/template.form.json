@@ -1,0 +1,129 @@
+{
+  "id": "telegram_send_message",
+  "i18n": {
+    "title": {
+      "uk": "Надіслати повідомлення в Telegram"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      },
+      "security": {
+        "uk": "Безпека"
+      }
+    },
+    "fields": {
+      "MESSAGE_TEXT": {
+        "uk": "Текст повідомлення"
+      },
+      "CHAT_ID": {
+        "uk": "ID чату"
+      },
+      "PARSE_MODE": {
+        "uk": "Режим парсингу"
+      },
+      "DISABLE_PREVIEW": {
+        "uk": "Вимкнути прев'ю"
+      },
+      "TELEGRAM_BOT_TOKEN_NAME": {
+        "uk": "Alias секрету токена бота"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "MESSAGE_TEXT",
+          "type": "textarea",
+          "required": true,
+          "sample": "Hello!"
+        },
+        {
+          "key": "CHAT_ID",
+          "type": "text",
+          "required": true,
+          "sample": "123456789"
+        },
+        {
+          "key": "PARSE_MODE",
+          "type": "text",
+          "required": false,
+          "default": "HTML"
+        },
+        {
+          "key": "DISABLE_PREVIEW",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "fields": [
+        {
+          "key": "TELEGRAM_BOT_TOKEN_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "TELEGRAM_BOT_TOKEN"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "actions": [
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "telegram_token"
+      },
+      {
+        "type": "http_request",
+        "invoke": "http:request",
+        "payload": {
+          "url": "https://api.telegram.org/bot${telegram_token}/sendMessage",
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "chat_id": "",
+            "text": "",
+            "parse_mode": "",
+            "disable_web_page_preview": false
+          }
+        }
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "TELEGRAM_BOT_TOKEN_NAME",
+      "to": "/actions/0/name",
+      "severity": "error"
+    },
+    {
+      "from": "CHAT_ID",
+      "to": "/actions/1/body/chat_id",
+      "severity": "error"
+    },
+    {
+      "from": "MESSAGE_TEXT",
+      "to": "/actions/1/body/text",
+      "severity": "error"
+    },
+    {
+      "from": "PARSE_MODE",
+      "to": "/actions/1/body/parse_mode",
+      "severity": "warn"
+    },
+    {
+      "from": "DISABLE_PREVIEW",
+      "to": "/actions/1/body/disable_web_page_preview",
+      "severity": "warn"
+    }
+  ]
+}

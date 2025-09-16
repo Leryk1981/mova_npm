@@ -1,0 +1,42 @@
+{
+  "id": "woocommerce_orders_list",
+  "title": "WooCommerce — отримання замовлень",
+  "category": "ecommerce",
+  "lang": "uk",
+  "source": "templates/blank/ua/woocommerce_orders_list_blank.json",
+  "output": "templates/ua/woocommerce_orders_list.json",
+  "sections": [
+    {
+      "title": "Налаштування API",
+      "fields": [
+        { "key": "WC_STORE_URL", "label": "URL магазину WooCommerce", "type": "text", "required": true, "placeholder": "https://yourstore.com" },
+        { "key": "WC_CONSUMER_KEY", "label": "Alias секрету Consumer Key", "type": "secret-alias", "required": true, "default": "WC_CONSUMER_KEY" },
+        { "key": "WC_CONSUMER_SECRET", "label": "Alias секрету Consumer Secret", "type": "secret-alias", "required": true, "default": "WC_CONSUMER_SECRET" }
+      ]
+    },
+    {
+      "title": "Параметри запиту",
+      "fields": [
+        { "key": "STATUS", "label": "Статус замовлень", "type": "text", "required": false, "placeholder": "any", "default": "any" },
+        { "key": "PER_PAGE", "label": "Кількість на сторінку", "type": "number", "required": false, "placeholder": "10", "default": "10" }
+      ]
+    },
+    {
+      "title": "Вивід",
+      "fields": [
+        { "key": "OUTPUT_FILE", "label": "Шлях до файлу виводу", "type": "text", "required": true, "placeholder": "orders.ndjson", "default": "woocommerce_orders.ndjson" }
+      ]
+    }
+  ],
+  "mapping": {
+    "WC_STORE_URL": "<WC_STORE_URL>",
+    "WC_CONSUMER_KEY": "<WC_CONSUMER_KEY>",
+    "WC_CONSUMER_SECRET": "<WC_CONSUMER_SECRET>",
+    "STATUS": "<STATUS>",
+    "PER_PAGE": "<PER_PAGE>",
+    "OUTPUT_FILE": "<OUTPUT_FILE>"
+  },
+  "actions": {
+    "onComplete": ["scaffold", "translate", "validate", "run"]
+  }
+}

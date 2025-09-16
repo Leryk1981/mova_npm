@@ -1,0 +1,135 @@
+{
+  "id": "slack_send_message",
+  "i18n": {
+    "title": {
+      "uk": "Надіслати повідомлення в Slack"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      },
+      "security": {
+        "uk": "Безпека"
+      }
+    },
+    "fields": {
+      "MESSAGE_TEXT": {
+        "uk": "Текст повідомлення"
+      },
+      "CHANNEL": {
+        "uk": "Канал"
+      },
+      "USERNAME": {
+        "uk": "Ім'я користувача"
+      },
+      "ICON_EMOJI": {
+        "uk": "Іконка emoji"
+      },
+      "SLACK_WEBHOOK_NAME": {
+        "uk": "Alias секрету webhook"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "MESSAGE_TEXT",
+          "type": "textarea",
+          "required": true,
+          "sample": "Привіт із MOVA!"
+        },
+        {
+          "key": "CHANNEL",
+          "type": "text",
+          "required": false,
+          "default": "#general"
+        },
+        {
+          "key": "USERNAME",
+          "type": "text",
+          "required": false,
+          "default": "MOVA Bot"
+        },
+        {
+          "key": "ICON_EMOJI",
+          "type": "text",
+          "required": false,
+          "default": ":robot_face:"
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "fields": [
+        {
+          "key": "SLACK_WEBHOOK_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "SLACK_WEBHOOK_URL"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "$comment": "Slack: надсилання повідомлення через Incoming Webhook.",
+    "actions": [
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "slack_webhook_url"
+      },
+      {
+        "type": "http_request",
+        "invoke": "http:request",
+        "payload": {
+          "url": "{+slack_webhook_url}",
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "text": "",
+            "channel": "",
+            "username": "",
+            "icon_emoji": ""
+          },
+          "result_in": "vars.slack_response"
+        }
+      },
+      {
+        "type": "print",
+        "message": "Slack message sent (status: ${vars.slack_response.__status})"
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "SLACK_WEBHOOK_NAME",
+      "to": "/actions/0/name",
+      "severity": "error"
+    },
+    {
+      "from": "MESSAGE_TEXT",
+      "to": "/actions/1/payload/body/text",
+      "severity": "error"
+    },
+    {
+      "from": "CHANNEL",
+      "to": "/actions/1/payload/body/channel",
+      "severity": "warn"
+    },
+    {
+      "from": "USERNAME",
+      "to": "/actions/1/payload/body/username",
+      "severity": "warn"
+    },
+    {
+      "from": "ICON_EMOJI",
+      "to": "/actions/1/payload/body/icon_emoji",
+      "severity": "warn"
+    }
+  ]
+}

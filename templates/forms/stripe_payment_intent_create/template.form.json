@@ -1,0 +1,122 @@
+{
+  "id": "stripe_payment_intent_create",
+  "i18n": {
+    "title": {
+      "uk": "Створити Payment Intent в Stripe"
+    },
+    "sections": {
+      "main": {
+        "uk": "Основне"
+      },
+      "security": {
+        "uk": "Безпека"
+      }
+    },
+    "fields": {
+      "AMOUNT_MINOR": {
+        "uk": "Сума (в мінорних одиницях)"
+      },
+      "CURRENCY": {
+        "uk": "Валюта"
+      },
+      "DESCRIPTION": {
+        "uk": "Опис"
+      },
+      "STRIPE_KEY_NAME": {
+        "uk": "Alias секрету API"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "AMOUNT_MINOR",
+          "type": "number",
+          "required": true,
+          "sample": 2500,
+          "validators": {
+            "min": 1
+          }
+        },
+        {
+          "key": "CURRENCY",
+          "type": "text",
+          "required": true,
+          "default": "EUR",
+          "sample": "EUR"
+        },
+        {
+          "key": "DESCRIPTION",
+          "type": "text",
+          "required": false,
+          "default": "Test order"
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "fields": [
+        {
+          "key": "STRIPE_KEY_NAME",
+          "type": "secret-alias",
+          "required": true,
+          "default": "STRIPE_API_KEY"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3",
+    "actions": [
+      {
+        "type": "secrets.get",
+        "name": "",
+        "out": "stripe_key"
+      },
+      {
+        "type": "http_request",
+        "invoke": "http:request",
+        "payload": {
+          "url": "https://api.stripe.com/v1/payment_intents",
+          "method": "POST",
+          "headers": {
+            "Authorization": "",
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          "body": "amount=&currency=&description="
+        }
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "STRIPE_KEY_NAME",
+      "to": "/actions/0/name",
+      "severity": "error"
+    },
+    {
+      "from": "STRIPE_KEY_NAME",
+      "to": "/actions/1/headers/Authorization",
+      "transform": "bearerFromAlias",
+      "severity": "error"
+    },
+    {
+      "from": "AMOUNT_MINOR",
+      "to": "/actions/1/body",
+      "transform": "int",
+      "severity": "error"
+    },
+    {
+      "from": "CURRENCY",
+      "to": "/actions/1/body",
+      "severity": "error"
+    },
+    {
+      "from": "DESCRIPTION",
+      "to": "/actions/1/body",
+      "severity": "warn"
+    }
+  ]
+}

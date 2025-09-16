@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/actions/try.schema.json",
   "title": "Action: Try/Catch/Finally",
   "description": "Схема для дії, що забезпечує обробку помилок та очищення.",
@@ -25,3 +25,4 @@
   },
   "required": ["type", "invoke", "payload"]
 }
+

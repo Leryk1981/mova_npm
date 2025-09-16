@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOVA: No-Code UI</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+        }
+        #root {
+            width: 100%;
+        }
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .app-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .app-header h1 {
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+        .app-header p {
+            font-size: 1.1rem;
+            color: #606770;
+        }
+        .template-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .template-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border: 1px solid #e0e0e0;
+        }
+        .template-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+        .template-card h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        .template-card .category {
+            font-size: 0.9rem;
+            color: #6c757d;
+            background-color: #e9ecef;
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        .secrets-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #ffc107;
+        }
+        .secrets-badge svg {
+            stroke: #ffc107;
+        }
+        .error-message {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" style="position: absolute; top: -40px; left: 6px; background: #000; color: #fff; padding: 8px; text-decoration: none; z-index: 100;" onFocus="this.style.top='6px'" onBlur="this.style.top='-40px'">Skip to main content</a>
+    <div id="root"></div>
+
+    <!--
+      NOTE: This setup uses CDN and in-browser JSX transpilation (Babel).
+      It's great for quick prototypes but not for production.
+      For a production build, you would use a bundler like Vite or Webpack.
+    -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Your React application -->
+    <script type="text/babel" src="/app.js"></script>
+</body>
+</html>
