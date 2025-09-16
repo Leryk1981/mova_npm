@@ -23,7 +23,7 @@
           "type": "object",
           "required": ["ast"],
           "properties": {
-            "ast": { "$ref": "../vnl.schema.json" },
+            "ast": { "$ref": "https://mova.dev/schemas/definitions/vnl.schema.json" },
             "expand": { "enum": ["inline", "call"], "default": "inline" },
             "save_as": { "type": "string" }
           },

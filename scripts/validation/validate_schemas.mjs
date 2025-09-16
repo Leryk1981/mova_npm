@@ -105,43 +105,54 @@ function validateFile(dataPath, schemaPath) {
 // --- Запуск валідації для всіх файлів ---
 console.log('--- Початок валідації канонічних файлів ---');
 
-const canonicalDir = resolve(projectRoot, 'canonical');
+const canonicalDirs = [
+  { label: 'canonical', dir: resolve(projectRoot, 'canonical') },
+  { label: 'templates/canonical', dir: resolve(projectRoot, 'templates/canonical') }
+];
 
-try {
-  const canonicalFiles = readdirSync(canonicalDir).filter(f => f.endsWith('.json'));
+let validatedFiles = 0;
 
-  if (canonicalFiles.length === 0) {
-    console.warn('⚠️  Не знайдено жодного .json файлу в директорії canonical для валідації.');
-  }
+for (const { label, dir } of canonicalDirs) {
+  try {
+    const files = readdirSync(dir).filter(f => f.endsWith('.json'));
 
-  for (const fileName of canonicalFiles) {
-    if (fileName === 'manifest.json') continue; // Ignore the manifest file
-
-    let schemaName;
-    // Проста логіка для визначення схеми за назвою файлу
-    if (fileName.includes('route')) {
-      schemaName = 'core/route.1.0.schema.json';
-    } else if (fileName.includes('plan')) {
-      schemaName = 'core/envelope.3.3.schema.json';
+    if (files.length === 0) {
+      console.warn(`⚠️  Не знайдено жодного .json файлу в директорії ${label} для валідації.`);
+      continue;
     }
 
-    if (schemaName) {
-      const dataPath = join('canonical', fileName);
-      const schemaPath = join('schemas', schemaName);
-      validateFile(dataPath, schemaPath);
+    for (const fileName of files) {
+      if (fileName === 'manifest.json') continue; // Ignore the manifest file
+
+      let schemaName;
+      if (fileName.includes('route')) {
+        schemaName = 'core/route.1.0.schema.json';
+      } else if (fileName.includes('plan') || fileName.includes('envelope')) {
+        schemaName = 'core/envelope.3.3.schema.json';
+      }
+
+      if (schemaName) {
+        const dataPath = join(label, fileName);
+        const schemaPath = join('schemas', schemaName);
+        validateFile(dataPath, schemaPath);
+        validatedFiles += 1;
+      } else {
+        console.warn(`⚠️  Не знайдено відповідної схеми для файлу: ${fileName}`);
+      }
+    }
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.warn(`⚠️  Директорія '${label}' не існує, валідацію пропущено.`);
     } else {
-      console.warn(`⚠️  Не знайдено відповідної схеми для файлу: ${fileName}`);
+      console.error(`💥 Не вдалося прочитати директорію ${label}:`, error);
+      hasErrors = true;
     }
-  }
-} catch (error) {
-  if (error.code === 'ENOENT') {
-    console.warn(`⚠️  Директорія 'canonical' не існує, валідацію пропущено.`);
-  } else {
-    console.error('💥 Не вдалося прочитати директорію canonical:', error);
-    hasErrors = true;
   }
 }
 
+if (validatedFiles === 0) {
+  console.warn('⚠️  Не знайдено канонічних файлів для валідації.');
+}
 console.log('\n--- Валідацію завершено ---');
 
 if (hasErrors) {
@@ -150,3 +161,4 @@ if (hasErrors) {
 } else {
   console.log('\n🎉 Усі канонічні файли успішно провалідовано!');
 }
+

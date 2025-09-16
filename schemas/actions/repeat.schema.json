@@ -1,24 +1,20 @@
-{
+ {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/actions/repeat.schema.json",
   "title": "Action: repeat",
   "type": "object",
-  "required": ["type", "params"],
+  "required": ["type", "times", "inline_plan"],
   "properties": {
     "type": { "const": "repeat" },
-    "params": {
-      "type": "object",
-      "required": ["times", "body"],
-      "properties": {
-        "times": { "type": "integer", "minimum": 1 },
-        "body": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "../envelope.3.3.schema.json#/properties/actions/items" }
-        }
-      },
-      "unevaluatedProperties": false
+    "name": { "type": "string" },
+    "times": { "type": "integer", "minimum": 1 },
+    "inline_plan": {
+      "$ref": "https://mova.dev/schemas/core/envelope.3.3.schema.json#/properties/actions"
+    },
+    "save_as": { "type": "string" },
+    "policies": {
+      "$ref": "https://mova.dev/schemas/definitions/policies.schema.json"
     }
   },
-  "unevaluatedProperties": false
+  "additionalProperties": false
 }

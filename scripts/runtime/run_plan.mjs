@@ -64,6 +64,15 @@ async function runPlan(planPath, initialParams = {}) {
   try {
     const plan = JSON.parse(readFileSync(planFullPath, 'utf-8'));
 
+    const envelopePayloadMediaType = plan.payload_media_type || 'application/json';
+    const envelopePayload = plan.payload;
+
+    if (envelopePayloadMediaType === 'application/ld+json') {
+      if (!envelopePayload || typeof envelopePayload !== 'object' || Array.isArray(envelopePayload) || envelopePayload['@context'] === undefined) {
+        throw new Error('Envelope payload_media_type is application/ld+json but payload.@context is missing.');
+      }
+    }
+
     // NEW: Validate initial parameters against the plan's schema
     if (plan.parameters) {
       const ajv = new Ajv2020({ allErrors: true });
@@ -78,6 +87,10 @@ async function runPlan(planPath, initialParams = {}) {
     }
 
     const context = { ...initialParams }; // Initialize context with input parameters
+    if (Object.prototype.hasOwnProperty.call(plan, 'payload')) {
+      context.payload = envelopePayload;
+    }
+    context.payload_media_type = envelopePayloadMediaType;
 
     // --- Action Handlers ---
     const actionHandlers = {
@@ -168,12 +181,17 @@ async function runPlan(planPath, initialParams = {}) {
       },
       'http:request': async (payload) => {
         const { url, method, headers, body, result_in } = payload; // Already interpolated
+        const requestHeaders = { ...(headers || {}) };
+        if (body !== undefined) {
+          requestHeaders['Content-Type'] = envelopePayloadMediaType;
+        }
+        const requestBody = body === undefined ? undefined : (typeof body === 'string' ? body : JSON.stringify(body));
         console.log(`[ENGINE] Making ${method} request to ${url}`);
         try {
           const response = await fetch(url, {
             method: method,
-            headers: headers,
-            body: body ? JSON.stringify(body) : undefined,
+            headers: requestHeaders,
+            body: requestBody,
           });
           console.log(`[ENGINE] Received response. Status: ${response.status}`);
           if (!response.ok) {
@@ -312,3 +330,9 @@ for (const arg of paramsArgs) {
 if (process.argv[1].endsWith('run_plan.mjs')) {
   runPlan(planFile, initialParams);
 }
+
+
+
+
+
+

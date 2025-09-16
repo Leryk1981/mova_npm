@@ -13,6 +13,9 @@ if (!existsSync(canonicalKeysPath)) {
 }
 
 const canonicalKeys = new Set(JSON.parse(readFileSync(canonicalKeysPath, 'utf8')));
+const disallowedActionKeys = new Set(['content_type', 'contentType', 'payload_media_type', 'тип_навантаження']);
+const actionContainers = new Set(['дії', 'actions']);
+
 const inputDirRelativePath = process.argv[2];
 
 if (!inputDirRelativePath) {
@@ -22,7 +25,6 @@ if (!inputDirRelativePath) {
 
 const inputDirFullPath = resolve(root, inputDirRelativePath);
 
-// Рекурсивна функція для пошуку всіх .json файлів
 function findJsonFiles(startPath) {
   let results = [];
   const files = readdirSync(startPath);
@@ -41,20 +43,40 @@ function findJsonFiles(startPath) {
 const files = findJsonFiles(inputDirFullPath);
 let hasErrors = false;
 
-function checkKeys(obj, filePath) {
-  if (!obj) return;
-  if (Array.isArray(obj)) return obj.forEach(item => checkKeys(item, filePath));
-  if (typeof obj === 'object') {
-    for (const key of Object.keys(obj)) {
-      if (canonicalKeys.has(key)) {
-        console.error(`❌ Помилка в ${filePath}: знайдено англійський структурний ключ "${key}".`);
-        hasErrors = true;
-      }
-      // Do not recurse into the 'параметри' block, as it contains a raw JSON Schema
-      // which uses English keywords like "type", "properties", etc.
-      if (key !== 'параметри') {
-        checkKeys(obj[key], filePath);
-      }
+function isInsideActions(ancestors) {
+  return ancestors.some(part => actionContainers.has(part));
+}
+
+function formatPath(segments) {
+  return segments
+    .map(segment => (typeof segment === 'number' ? `[${segment}]` : segment))
+    .join('.');
+}
+
+function checkKeys(obj, filePath, ancestors = []) {
+  if (obj === null || typeof obj !== 'object') return;
+
+  if (Array.isArray(obj)) {
+    obj.forEach((item, index) => checkKeys(item, filePath, ancestors.concat(index)));
+    return;
+  }
+
+  for (const key of Object.keys(obj)) {
+    const nextAncestors = ancestors.concat(key);
+
+    if (canonicalKeys.has(key)) {
+      console.error(`❌ Помилка в ${filePath}: знайдено англійський структурний ключ "${key}".`);
+      hasErrors = true;
+    }
+
+    if (isInsideActions(ancestors) && disallowedActionKeys.has(key)) {
+      const pathString = formatPath(nextAncestors);
+      console.error(`❌ Помилка в ${filePath}: поле "${key}" заборонено всередині дій (шлях: ${pathString}).`);
+      hasErrors = true;
+    }
+
+    if (key !== 'параметри') {
+      checkKeys(obj[key], filePath, nextAncestors);
     }
   }
 }

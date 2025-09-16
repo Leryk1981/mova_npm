@@ -1,16 +1,24 @@
 [
+  "@context",
   "actions",
   "count",
   "delay_ms",
   "description",
   "dlq",
+  "for_each",
+  "if",
   "invoke",
+  "loop_variable",
   "mova_version",
+  "on_error",
+  "on_success",
+  "parameters",
+  "payload",
+  "payload_media_type",
   "plan_ref",
   "queue",
   "retry",
   "route_version",
   "timeout_ms",
-  "trigger",
-  "type"
+  "trigger"
 ]

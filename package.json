@@ -18,7 +18,9 @@
     "build:uk-schema": "node scripts/build/build_uk_schema.mjs",
     "build:fingerprint": "node scripts/build/build_schema_fingerprint.mjs",
     "cli": "node cli.mjs",
-    "setup:dirs": "node scripts/setup_dirs.mjs"
+    "setup:dirs": "node scripts/setup_dirs.mjs",
+    "ua:jsonld:demo": "node scripts/translation/uk_to_en.mjs templates/ua/envelope_jsonld_min.json templates/canonical/envelope_jsonld_min.canonical.json",
+    "smoke:jsonld": "npm run ua:jsonld:demo && npm run validate"
   },
   "author": "",
   "license": "MIT",
