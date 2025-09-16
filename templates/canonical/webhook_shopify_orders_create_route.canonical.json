@@ -9,28 +9,6 @@
     }
   },
   "invoke": {
-    "plan": {
-      "mova_version": "3.3",
-      "actions": [
-        {
-          "type": "отримати_секрет",
-          "name": "SHOPIFY_WEBHOOK_SECRET",
-          "out": "vars.webhook_secret"
-        },
-        {
-          "type": "shopify_verify_webhook",
-          "secret_value": "${vars.webhook_secret}"
-        },
-        {
-          "type": "file_append_jsonl",
-          "path": "out/shopify_orders.ndjson",
-          "value": "${payload}"
-        },
-        {
-          "type": "print",
-          "message": "OK orders/create ${payload.id}"
-        }
-      ]
-    }
+    "plan_ref": "shopify.webhook.verify_and_save"
   }
 }
