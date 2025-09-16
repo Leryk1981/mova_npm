@@ -1,11 +1,11 @@
 {
-  "mova_version": "3.3",
-  "payload_media_type": "application/ld+json",
-  "$comment": "JSON-LD LocalBusiness: podstawowy profil SEO dla lokalnych firm.",
-  "payload": {
+  "version": "3.3",
+  "nutzlast_typ": "application/ld+json",
+  "$comment": "JSON-LD LocalBusiness: Basis-SEO-Profil für lokale Unternehmen.",
+  "nutzlast": {
     "@context": {
       "@vocab": "https://schema.org/",
-      "@language": "pl"
+      "@language": "de"
     },
     "@type": "LocalBusiness",
     "name": "<BUSINESS_NAME>",
@@ -24,17 +24,17 @@
       "<OPENING_HOURS_ARRAY>"
     ]
   },
-  "actions": [
+  "aktionen": [
     {
-      "type": "zapisać_plik",
-      "path": "<OUT_FILE>",
-      "value": "${payload}",
+      "typ": "datei_schreiben",
+      "pfad": "<OUT_FILE>",
+      "wert": "${payload}",
       "content_type": "application/ld+json",
-      "$comment": "Lub na podstawie root typ_ładunku; zduplikowane dla jasności."
+      "$comment": "Oder basierend auf dem root payload_type; zur Klarheit dupliziert."
     },
     {
-      "type": "drukować",
-      "message": "JSON-LD LocalBusiness zapisany w <OUT_FILE>"
+      "typ": "drucken",
+      "nachricht": "JSON-LD LocalBusiness in <OUT_FILE> gespeichert"
     }
   ]
 }

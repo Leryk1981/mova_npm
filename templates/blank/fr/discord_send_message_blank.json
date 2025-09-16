@@ -1,20 +1,20 @@
 {
-  "mova_version": "3.3",
-  "$comment": "Discord: wysłać wiadomość przez Incoming Webhook.",
+  "version": "3.3",
+  "$comment": "Discord: envoyer un message via Incoming Webhook.",
   "actions": [
     {
-      "type": "pobrać_sekret",
+      "type": "récupérer_secret",
       "name": "<DISCORD_WEBHOOK_SECRET_NAME>",
       "out": "vars.webhook"
     },
     {
-      "type": "żądanie_http",
-      "method": "POST",
+      "type": "requête_http",
+      "méthode": "POST",
       "url": "${vars.webhook}",
-      "headers": {
+      "en_têtes": {
         "Content-Type": "application/json"
       },
-      "body": {
+      "corps": {
         "content": "<CONTENT>",
         "username": "<USERNAME>",
         "avatar_url": "<AVATAR_URL>"
@@ -22,8 +22,8 @@
       "out": "vars.resp"
     },
     {
-      "type": "drukować",
-      "message": "Discord zaakceptował (status w vars.resp.__status)"
+      "type": "imprimer",
+      "message": "Discord accepté (statut dans vars.resp.__status)"
     }
   ]
 }

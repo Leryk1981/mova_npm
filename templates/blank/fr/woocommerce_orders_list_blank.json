@@ -1,34 +1,34 @@
 {
-  "mova_version": "3.3",
-  "$comment": "WooCommerce: pobrać zamówienia z paginacją i zapisać w NDJSON.",
+  "version": "3.3",
+  "$comment": "WooCommerce: récupérer les commandes avec pagination et enregistrer en NDJSON.",
   "actions": [
     {
-      "type": "pobrać_sekret",
+      "type": "récupérer_secret",
       "name": "<CK_SECRET_NAME>",
       "out": "vars.ck"
     },
     {
-      "type": "pobrać_sekret",
+      "type": "récupérer_secret",
       "name": "<CS_SECRET_NAME>",
       "out": "vars.cs"
     },
     {
-      "type": "ustawić_zmienną",
+      "type": "définir_variable",
       "variable": "vars.base",
-      "value": "<BASE_URL>"
+      "valeur": "<BASE_URL>"
     },
     {
-      "type": "ustawić_zmienną",
+      "type": "définir_variable",
       "variable": "vars.page",
-      "value": 1
+      "valeur": 1
     },
     {
-      "type": "powtórzyć",
-      "count": 10,
+      "type": "répéter",
+      "nombre": 10,
       "actions": [
         {
-          "type": "żądanie_http",
-          "method": "GET",
+          "type": "requête_http",
+          "méthode": "GET",
           "url": "${vars.base}/wp-json/wc/v3/orders",
           "auth": {
             "type": "basic",
@@ -44,32 +44,32 @@
           "out": "vars.page_data"
         },
         {
-          "type": "if",
-          "expr": "${Array.isArray(vars.page_data) && vars.page_data.length > 0}",
-          "then": [
+          "type": "condition",
+          "expression": "${Array.isArray(vars.page_data) && vars.page_data.length > 0}",
+          "alors": [
             {
-              "type": "for_each",
-              "lista": "${vars.page_data}",
-              "loop_variable": "order",
+              "type": "pour_chaque",
+              "liste": "${vars.page_data}",
+              "variable_boucle": "order",
               "actions": [
                 {
-                  "type": "zapisać_plik",
-                  "path": "<OUT_FILE>",
-                  "value": "${order}",
+                  "type": "écrire_fichier",
+                  "chemin": "<OUT_FILE>",
+                  "valeur": "${order}",
                   "mode": "append_jsonl"
                 }
               ]
             },
             {
-              "type": "ustawić_zmienną",
+              "type": "définir_variable",
               "variable": "vars.page",
-              "value": "${vars.page + 1}"
+              "valeur": "${vars.page + 1}"
             }
           ],
-          "else": [
+          "sinon": [
             {
-              "type": "return",
-              "value": "done"
+              "type": "retourner",
+              "valeur": "done"
             }
           ]
         }
