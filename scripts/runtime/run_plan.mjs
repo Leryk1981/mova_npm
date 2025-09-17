@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import Ajv2020 from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
+import { createAjv } from '../lib/createAjv.mjs';
+import { normalizeAjvErrors, validationError } from '../error_wrap.mjs';
 
 // --- Setup ---
 const __filename = fileURLToPath(import.meta.url);
@@ -111,17 +111,13 @@ async function runPlan(planPath, initialParams = {}) {
 
     // NEW: Validate initial parameters against the plan's schema
     if (plan.parameters) {
-      const ajv = new Ajv2020({ allErrors: true });
-      addFormats(ajv);
+      const ajv = createAjv();
       const validate = ajv.compile(plan.parameters);
       if (!validate(initialParams)) {
-        console.error('❌ [ENGINE] Вхідні параметри не відповідають схемі плану:');
-        console.error(JSON.stringify(validate.errors, null, 2));
-        process.exit(1);
+        throw validationError('Validation failed', normalizeAjvErrors(validate.errors));
       }
-      console.log('✅ [ENGINE] Вхідні параметри успішно провалідовано.');
+      console.log('? [ENGINE] ��?��? ��ࠬ��� ��?譮 �஢��?������.');
     }
-
     const context = { ...initialParams }; // Initialize context with input parameters
     if (Object.prototype.hasOwnProperty.call(plan, 'payload')) {
       context.payload = envelopePayload;
@@ -340,7 +336,11 @@ async function runPlan(planPath, initialParams = {}) {
       return context; // Return the final context if no explicit return
     }
   } catch (error) {
-    console.error(`💥 [ENGINE] Critical error during plan execution:`, error);
+    if (error && typeof error === 'object' && error.status === 422) {
+      console.error(JSON.stringify(error.body, null, 2));
+      process.exit(1);
+    }
+    console.error(`?? [ENGINE] Critical error during plan execution:`, error);
     process.exit(1);
   }
 }

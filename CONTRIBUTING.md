@@ -1,12 +1,19 @@
-# Внесок
+# Contributing
 
-1. Пишемо людські приклади українською у `templates/ua/`.
-2. Оновлюємо словник `lexicon_uk.json` **лише** додаванням нових пар. Не змінюйте існуючі ключі без ADR.
-3. Запускаємо `npm run ua:*` для отримання канонічних файлів (`*.canonical.json`).
-4. Валідовуємо канонічні артефакти проти офіційних схем MOVA (англ.).
-5. Для змін правил/кордонів — створіть ADR у `specs/adr/`.
+## Setup
+- `nvm use` (see `.nvmrc`)
+- `npm ci`
 
-## Принципи
-- Людський шар ≠ канонічний шар. Не змішуємо.
-- Канонічні схеми завжди англійською.
-- Будь-яка зміна мапи ключів потребує ADR.
+## Commands
+- `npm run build`
+- `npm run validate:schemas`
+- `npm run smoke`
+- `npm test`
+
+## Code style
+- ESM only (`"type":"module"`). Use 2 spaces.
+- Keep schemas governed via `SCHEMA_CHANGELOG.md` in PRs.
+
+## Releases
+- RC: `npm version 0.9.0-rc.X && npm publish --tag next --provenance`
+- Stable: tag `vX.Y.Z` to trigger `release.yml`.

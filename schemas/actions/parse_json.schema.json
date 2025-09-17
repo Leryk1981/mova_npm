@@ -1,20 +1,55 @@
- {
+{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mova.dev/schemas/actions/parse_json.schema.json",
   "title": "Action: parse_json",
   "type": "object",
-  "required": ["type"],
+  "required": [
+    "type"
+  ],
   "oneOf": [
-    { "required": ["text"] },
-    { "required": ["from"] }
+    {
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {}
+      }
+    },
+    {
+      "required": [
+        "from"
+      ],
+      "properties": {
+        "from": {}
+      }
+    }
   ],
   "properties": {
-    "type": { "const": "parse_json" },
-    "name": { "type": "string" },
-    "text": { "type": ["string", "object"] },
-    "from": { "type": "string" },
-    "save_as": { "type": "string" },
-    "policies": { "$ref": "https://mova.dev/schemas/definitions/policies.schema.json" }
+    "type": {
+      "const": "parse_json"
+    },
+    "name": {
+      "type": "string"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "from": {
+      "type": "string"
+    },
+    "save_as": {
+      "type": "string"
+    },
+    "policies": {
+      "$ref": "https://mova.dev/schemas/definitions/policies.schema.json"
+    }
   },
   "additionalProperties": false
 }
