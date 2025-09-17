@@ -18,8 +18,10 @@ jobs:
       - run: npm run smoke || true
       - run: npm test -- --reporter dot || true
       - run: npm audit --omit=dev || true
-      - run: npx @cyclonedx/cyclonedx-npm --output-file sbom/bom.json
+
+      - run: mkdir -p sbom
+      - run: npx @cyclonedx/cyclonedx-npm --output-file sbom/bom-${{ matrix.node }}.json
       - uses: actions/upload-artifact@v4
         with:
-          name: sbom
-          path: sbom/bom.json
+          name: sbom-${{ matrix.node }}
+          path: sbom/bom-${{ matrix.node }}.json
