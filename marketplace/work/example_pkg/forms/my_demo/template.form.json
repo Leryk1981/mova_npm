@@ -1,0 +1,40 @@
+{
+  "id": "my_demo",
+  "i18n": {
+    "title": { "uk": "Демо форма" },
+    "sections": { "main": { "uk": "Основне" } },
+    "fields": {
+      "MESSAGE": { "uk": "Повідомлення" }
+    }
+  },
+  "sections": [
+    {
+      "key": "main",
+      "fields": [
+        {
+          "key": "MESSAGE",
+          "type": "text",
+          "required": true,
+          "sample": "Привіт, MOVA!"
+        }
+      ]
+    }
+  ],
+  "baseCanonical": {
+    "mova_version": "3.3.0",
+    "$schema": "envelope.schema.json",
+    "actions": [
+      {
+        "type": "print",
+        "message": "Hello from example_pkg"
+      }
+    ]
+  },
+  "bind": [
+    {
+      "from": "MESSAGE",
+      "to": "/actions/0/message",
+      "severity": "error"
+    }
+  ]
+}

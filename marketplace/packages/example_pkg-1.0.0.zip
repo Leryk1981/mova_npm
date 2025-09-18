@@ -1,0 +1,20 @@
+{
+  "manifest": {
+    "id": "example_pkg",
+    "version": "1.0.0",
+    "name": "Example package",
+    "description": "Demo marketplace package for smoke tests.",
+    "forms": [
+      {
+        "id": "my_demo",
+        "title": "Демонстраційна форма",
+        "path": "forms/my_demo/template.form.json"
+      }
+    ]
+  },
+  "files": {
+    "forms/my_demo/smoke.values.json": "{\n  \"MESSAGE\": \"Привіт, з пакету!\"\n}\n",
+    "forms/my_demo/template.form.json": "{\n  \"id\": \"my_demo\",\n  \"i18n\": {\n    \"title\": { \"uk\": \"Демо форма\" },\n    \"sections\": { \"main\": { \"uk\": \"Основне\" } },\n    \"fields\": {\n      \"MESSAGE\": { \"uk\": \"Повідомлення\" }\n    }\n  },\n  \"sections\": [\n    {\n      \"key\": \"main\",\n      \"fields\": [\n        {\n          \"key\": \"MESSAGE\",\n          \"type\": \"text\",\n          \"required\": true,\n          \"sample\": \"Привіт, MOVA!\"\n        }\n      ]\n    }\n  ],\n  \"baseCanonical\": {\n    \"mova_version\": \"3.3.0\",\n    \"$schema\": \"envelope.schema.json\",\n    \"actions\": [\n      {\n        \"type\": \"print\",\n        \"message\": \"Hello from example_pkg\"\n      }\n    ]\n  },\n  \"bind\": [\n    {\n      \"from\": \"MESSAGE\",\n      \"to\": \"/actions/0/message\",\n      \"severity\": \"error\"\n    }\n  ]\n}\n",
+    "manifest.json": "{\n  \"id\": \"example_pkg\",\n  \"version\": \"1.0.0\",\n  \"name\": \"Example package\",\n  \"description\": \"Demo marketplace package for smoke tests.\",\n  \"forms\": [\n    {\n      \"id\": \"my_demo\",\n      \"title\": \"Демонстраційна форма\",\n      \"path\": \"forms/my_demo/template.form.json\"\n    }\n  ]\n}\n"
+  }
+}

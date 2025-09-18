@@ -6,6 +6,8 @@ import fs from 'fs/promises';
 import os from 'os';
 import { spawn } from 'child_process';
 
+const builderFormIdPattern = /^[a-z0-9_]+$/;
+
 // Оскільки ми використовуємо ES Modules, __dirname не доступний.
 // Це стандартний спосіб отримати шлях до поточної директорії.
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +18,56 @@ const port = Number(process.env.PORT || 3000);
 
 // Директорія з визначеннями форм для UI, як описано в ТЗ (tz_ui.md)
 const FORM_DEFS_DIR = path.join(__dirname, 'form_definitions');
+const FORMS_ROOT = path.join(__dirname, 'templates', 'forms');
+const MARKETPLACE_ROOT = path.join(__dirname, 'marketplace');
+const MARKETPLACE_PACKAGES_DIR = path.join(MARKETPLACE_ROOT, 'packages');
+const MARKETPLACE_INDEX_PATH = path.join(MARKETPLACE_ROOT, 'index.json');
+const MARKETPLACE_INSTALLED_DIR = path.join(MARKETPLACE_ROOT, 'installed');
+const OUT_DIR = path.join(__dirname, 'out');
+
+const installedPackages = new Map();
+
+async function ensureDir(target) {
+  await fs.mkdir(target, { recursive: true });
+}
+
+async function readJsonFile(filePath) {
+  const data = await fs.readFile(filePath, 'utf-8');
+  return JSON.parse(data);
+}
+
+async function writeJsonFile(filePath, data) {
+  await ensureDir(path.dirname(filePath));
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+}
+
+async function loadMarketplaceIndex() {
+  try {
+    return await readJsonFile(MARKETPLACE_INDEX_PATH);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+}
+
+async function readMarketplacePackage(id, version) {
+  const fileName = `${id}-${version}.zip`;
+  const packagePath = path.join(MARKETPLACE_PACKAGES_DIR, fileName);
+  const packageJson = await readJsonFile(packagePath);
+  return packageJson;
+}
+
+async function extractMarketplacePackage(manifest, files) {
+  const targetDir = path.join(MARKETPLACE_INSTALLED_DIR, `${manifest.id}-${manifest.version}`);
+  for (const [relativePath, content] of Object.entries(files || {})) {
+    const resolvedPath = path.join(targetDir, relativePath);
+    await ensureDir(path.dirname(resolvedPath));
+    await fs.writeFile(resolvedPath, content);
+  }
+  return targetDir;
+}
 
 // --- Middleware ---
 app.use(cors()); // Дозволяємо крос-доменні запити
@@ -166,6 +218,51 @@ app.post('/api/build-canonical', async (req, res) => {
     }
 });
 
+app.post('/api/builder/preview', async (req, res) => {
+    try {
+        const { envelope, formSpec } = req.body || {};
+        if (envelope) {
+            const version = (envelope.mova_version || '').toString();
+            if (!/^3\.3\./.test(version)) {
+                return res.status(422).json({ error: { code: 'ENVELOPE_VERSION_UNSUPPORTED', message: 'Підтримуються лише mova_version 3.3.x.' } });
+            }
+            return res.json({ ok: true, envelope });
+        }
+
+        if (formSpec?.id) {
+            const [pkgId] = formSpec.id.split(':');
+            const isInstalled = Array.from(installedPackages.keys()).some(key => key.startsWith(`${pkgId}@`));
+            if (!isInstalled) {
+                return res.status(422).json({ error: { code: 'PACKAGE_NOT_INSTALLED', message: 'Пакет не встановлено.' } });
+            }
+            return res.json({ ok: true });
+        }
+
+        return res.status(400).json({ error: { code: 'PREVIEW_INVALID', message: 'Необхідно надати envelope або formSpec.' } });
+    } catch (error) {
+        console.error('Builder preview failed:', error);
+        res.status(500).json({ error: { code: 'PREVIEW_FAILED', message: 'Не вдалося згенерувати попередній перегляд.' } });
+    }
+});
+
+app.post('/api/builder/save', async (req, res) => {
+    const { formSpec } = req.body || {};
+    if (!formSpec || typeof formSpec.id !== 'string' || !builderFormIdPattern.test(formSpec.id)) {
+        return res.status(422).json({ error: { code: 'FORMSPEC_INVALID', message: 'Неприпустимий ідентифікатор форми.' } });
+    }
+
+    try {
+        const targetDir = path.join(FORMS_ROOT, formSpec.id);
+        const targetFile = path.join(targetDir, 'template.form.json');
+        await writeJsonFile(targetFile, formSpec);
+        const relativePath = path.posix.join('templates', 'forms', formSpec.id, 'template.form.json');
+        res.json({ ok: true, id: formSpec.id, path: relativePath });
+    } catch (error) {
+        console.error('Builder save failed:', error);
+        res.status(500).json({ error: { code: 'SAVE_FAILED', message: 'Не вдалося зберегти форму.' } });
+    }
+});
+
 // POST /api/translate — переклад UA-JSON в canonical
 app.post('/api/translate', async (req, res) => {
     const { uaJson, lang = 'uk' } = req.body;
@@ -250,6 +347,61 @@ app.post('/api/run', async (req, res) => {
         res.status(500).json({ success: false, error: error.stderr || 'Не вдалося виконати план.' });
     } finally {
         if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
+    }
+});
+
+app.get('/api/market/list', async (_req, res) => {
+    try {
+        const items = await loadMarketplaceIndex();
+        const enriched = items.map(item => ({
+            ...item,
+            installed: Array.from(installedPackages.keys()).some(key => key.startsWith(`${item.id}@`))
+        }));
+        res.json(enriched);
+    } catch (error) {
+        console.error('Marketplace list failed:', error);
+        res.status(500).json({ error: { code: 'MARKET_LIST_FAILED', message: 'Не вдалося отримати список пакунків.' } });
+    }
+});
+
+app.post('/api/market/install', async (req, res) => {
+    try {
+        const { id, version } = req.body || {};
+        if (!id || !version) {
+            return res.status(400).json({ error: { code: 'MARKET_INVALID_REQUEST', message: 'Необхідні id та version.' } });
+        }
+
+        const key = `${id}@${version}`;
+        if (installedPackages.has(key)) {
+            return res.status(409).json({ error: { code: 'ALREADY_INSTALLED', message: 'Пакет вже встановлено.' } });
+        }
+
+        const index = await loadMarketplaceIndex();
+        const manifest = index.find(item => item.id === id && item.version === version);
+        if (!manifest) {
+            return res.status(404).json({ error: { code: 'PACKAGE_NOT_FOUND', message: 'Пакет не знайдено.' } });
+        }
+
+        const pkg = await readMarketplacePackage(id, version);
+        const targetDir = await extractMarketplacePackage(pkg.manifest, pkg.files);
+        installedPackages.set(key, { manifest, targetDir });
+        res.json({ installed: true });
+    } catch (error) {
+        console.error('Marketplace install failed:', error);
+        res.status(500).json({ error: { code: 'INSTALL_FAILED', message: 'Не вдалося встановити пакет.' } });
+    }
+});
+
+app.post('/api/webhook/proxy/echo_local', async (req, res) => {
+    try {
+        await ensureDir(OUT_DIR);
+        const logPath = path.join(OUT_DIR, 'webhooks.ndjson');
+        const record = { ts: new Date().toISOString(), body: req.body };
+        await fs.appendFile(logPath, `${JSON.stringify(record)}\n`);
+        res.json({ ok: true });
+    } catch (error) {
+        console.error('Proxy echo failed:', error);
+        res.status(500).json({ error: { code: 'PROXY_FAILED', message: 'Не вдалося зберегти webhook.' } });
     }
 });
 
