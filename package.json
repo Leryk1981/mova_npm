@@ -17,7 +17,8 @@
     "start:ui": "node server.js",
     "run": "node scripts/runtime/run_plan.mjs",
     "cli": "node cli.mjs",
-    "dev:server": "node server.js"
+    "dev:server": "node server.js",
+    "smoke:preview": "node scripts/tests/run_builder_preview_smoke.mjs"
   },
   "author": "",
   "license": "MIT",

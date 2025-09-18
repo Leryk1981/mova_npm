@@ -1,8 +1,90 @@
+import Ajv from 'ajv/dist/2020.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import express from 'express';
 
 const router = express.Router();
+
+const ajv = new Ajv({ allErrors: true, strict: true, allowUnionTypes: true, discriminator: true, strictRequired: false });
+ajv.addFormat('uri-template', true);
+
+(function loadSchemas() {
+  const root = path.join(process.cwd(), 'schemas');
+  if (!fs.existsSync(root)) return;
+
+  const added = new Set();
+  const register = (schema, key) => {
+    if (!key || added.has(key)) return;
+    try {
+      ajv.addSchema(schema, key);
+      added.add(key);
+    } catch {
+      added.add(key);
+    }
+  };
+
+  const stack = [{ dir: root, relative: '' }];
+  while (stack.length) {
+    const { dir, relative } = stack.pop();
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        stack.push({
+          dir: path.join(dir, entry.name),
+          relative: relative ? `${relative}/${entry.name}` : entry.name
+        });
+        continue;
+      }
+      if (!entry.isFile() || !entry.name.endsWith('.json')) continue;
+
+      const schemaPath = path.join(dir, entry.name);
+      const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+      const relKey = relative ? `${relative}/${entry.name}` : entry.name;
+
+      register(schema, relKey);
+      register(schema, entry.name);
+      if (schema.$id) register(schema, schema.$id);
+
+      const aliasName = entry.name.replace(/\.[0-9]+\.[0-9]+\.schema\.json$/, '.schema.json');
+      if (aliasName !== entry.name) {
+        const aliasKey = relative ? `${relative}/${aliasName}` : aliasName;
+        register(schema, aliasKey);
+        register(schema, aliasName);
+      }
+    }
+  }
+})();
+
+async function buildCanonicalFromForm(formSpec) {
+  if (formSpec?.baseCanonical) return formSpec.baseCanonical;
+  throw new Error('FORM_BUILD_NOT_IMPLEMENTED');
+}
+
+function send422(res, details) {
+  return res.status(422).json({
+    error: {
+      code: 'VALIDATION_FAILED',
+      message: 'Envelope validation failed',
+      details
+    }
+  });
+}
+
+function validateEnvelope(envelope) {
+  const id = envelope?.$schema || envelope?.$id;
+  let validate = id ? ajv.getSchema(id) : null;
+  if (!validate) {
+    validate = ajv.getSchema('envelope.schema.json');
+  }
+  if (!validate) return { ok: false, errors: [{ message: 'Schema not found' }] };
+
+  const v = String(envelope?.mova_version || '');
+  if (!/^3\.3\.\d+$/.test(v)) {
+    return { ok: false, errors: [{ message: `Only mova_version 3.3.x is accepted (found: ${v})`, keyword: 'version-gate' }] };
+  }
+
+  const ok = validate(envelope);
+  return ok ? { ok: true } : { ok: false, errors: validate.errors || [] };
+}
 
 function safeReadJSON(filePath) {
   try {
@@ -72,6 +154,45 @@ router.get('/catalog/actions', (_req, res) => {
       }
     }
   ]);
+});
+
+router.post('/preview', async (req, res) => {
+  try {
+    const body = req.body || {};
+    let envelope;
+
+    if (body.formSpec) {
+      const canon = await buildCanonicalFromForm(body.formSpec);
+      envelope = canon;
+    } else if (body.envelope) {
+      envelope = body.envelope;
+    } else {
+      return send422(res, [{ message: 'Either formSpec or envelope is required' }]);
+    }
+
+    let normalized = envelope;
+    let insertedActions = false;
+    if (normalized && typeof normalized === 'object') {
+      normalized = { ...normalized };
+      if (!('actions' in normalized) && Array.isArray(normalized.steps)) {
+        normalized.actions = normalized.steps;
+        insertedActions = true;
+      }
+    }
+
+    const result = validateEnvelope(normalized);
+    const allowEmptyActions = insertedActions && Array.isArray(normalized?.actions) && normalized.actions.length === 0 && Array.isArray(result.errors) && result.errors.every(err => err.keyword === 'minItems' && err.instancePath === '/actions');
+
+    if (!result.ok && !allowEmptyActions) {
+      return send422(res, result.errors);
+    }
+
+    return res.json({ ok: true, envelope: normalized });
+  } catch (e) {
+    return res.status(500).json({
+      error: { code: 'PREVIEW_INTERNAL_ERROR', message: String(e?.message || e) }
+    });
+  }
 });
 
 export default router;
