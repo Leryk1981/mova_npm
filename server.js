@@ -1,4 +1,5 @@
 import express from 'express';
+import builderController from './server/builder.controller.mjs';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Директорія з визначеннями форм для UI, як описано в ТЗ (tz_ui.md)
 const FORM_DEFS_DIR = path.join(__dirname, 'form_definitions');
@@ -20,6 +21,8 @@ const FORM_DEFS_DIR = path.join(__dirname, 'form_definitions');
 // --- Middleware ---
 app.use(cors()); // Дозволяємо крос-доменні запити
 app.use(express.json());
+
+app.use('/api/builder', builderController);
 
 // TODO: Додати CSRF protection middleware для POST/PUT/DELETE запитів
 // TODO: Додати rate-limiting middleware для /api/run, /api/validate

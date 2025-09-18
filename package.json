@@ -16,7 +16,8 @@
     "lint:cli-i18n": "node scripts/lint/check_cli_i18n.mjs",
     "start:ui": "node server.js",
     "run": "node scripts/runtime/run_plan.mjs",
-    "cli": "node cli.mjs"
+    "cli": "node cli.mjs",
+    "dev:server": "node server.js"
   },
   "author": "",
   "license": "MIT",
