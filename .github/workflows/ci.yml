@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: ci
 <<<<<<< HEAD
 on:
@@ -66,3 +67,44 @@ jobs:
 =======
           if-no-files-found: error
 >>>>>>> origin/codex/add-english-first-cli-and-i18n-framework
+=======
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smoke tests
+        run: npm run smoke
+
+      - name: Ensure schema changes are logged
+        run: |
+          if git diff --name-only origin/main...HEAD | grep -q "^schemas/"; then
+            if ! git diff --name-only origin/main...HEAD | grep -q "SCHEMA_CHANGELOG.md"; then
+              echo "Schema changed but SCHEMA_CHANGELOG.md not updated"
+              exit 1
+            fi
+          fi
+>>>>>>> origin/codex/add-semver-gate-and-schema-changelog

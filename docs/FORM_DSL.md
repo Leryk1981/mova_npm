@@ -31,7 +31,7 @@ FORM-DSL описує інтерактивні форми у MOVA. Кожна ф
     }
   ],
   "baseCanonical": {
-    "mova_version": "3.3",
+    "mova_version": "3.3.0",
     "actions": [...]
   },
   "bind": [

@@ -64,7 +64,7 @@
     }
   ],
   "baseCanonical": {
-    "mova_version": "3.3",
+    "mova_version": "3.3.0",
     "$comment": "Discord: повідомлення через Incoming Webhook.",
     "actions": [
       {

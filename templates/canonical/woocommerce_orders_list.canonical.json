@@ -1,5 +1,5 @@
 {
-  "mova_version": "3.3",
+  "mova_version": "3.3.0",
   "$comment": "WooCommerce: отримання замовлень із пагінацією, запис у NDJSON.",
   "actions": [
     {

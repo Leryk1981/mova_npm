@@ -1,5 +1,5 @@
 {
-  "mova_version": "3.3",
+  "mova_version": "3.3.0",
   "id": "mova.recipes.deploy_browser",
   "description": "Deploy service and perform browser navigation",
   "policies": {

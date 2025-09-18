@@ -1,5 +1,5 @@
 {
-  "mova_version": "3.3",
+  "mova_version": "3.3.0",
   "id": "mova.recipes.messaging_write",
   "description": "Send message and write document",
   "policies": {
