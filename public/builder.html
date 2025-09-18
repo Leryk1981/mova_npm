@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>MOVA Builder (min)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; max-width: 960px; }
+    h1 { margin-top: 0; }
+    .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:10px; }
+    textarea { width:100%; height:280px; font-family: ui-monospace, SFMono-Regular, SFMono, Menlo, Consolas, monospace; font-size: 14px; padding: 10px; box-sizing: border-box; }
+    pre { background:#f6f8fa; padding:10px; overflow:auto; min-height:120px; border-radius:6px; }
+    button { padding:8px 12px; cursor:pointer; }
+    select { min-width: 260px; padding:6px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; }
+  </style>
+</head>
+<body>
+  <h1>MOVA Builder</h1>
+
+  <div class="row">
+    <label for="tpl">Template:</label>
+    <select id="tpl"></select>
+    <div class="actions">
+      <button id="btn-load">Load</button>
+      <button id="btn-demo">Fill demo envelope</button>
+      <button id="btn-preview">Preview</button>
+      <button id="btn-save">Save</button>
+    </div>
+  </div>
+
+  <textarea id="jsonBox" placeholder='{"formSpec": {"id": "..."}}'></textarea>
+
+  <h3>Result</h3>
+  <pre id="out">Select a template and load or fill demo payload.</pre>
+
+  <script>
+    const tpl = document.getElementById('tpl');
+    const jsonBox = document.getElementById('jsonBox');
+    const out = document.getElementById('out');
+
+    const api = async (path, options) => {
+      try {
+        const res = await fetch(path, options);
+        const body = await res.json().catch(() => ({}));
+        return { status: res.status, body };
+      } catch (error) {
+        return { status: 0, body: { error: { message: error.message || String(error) } } };
+      }
+    };
+
+    function showResult(result) {
+      out.textContent = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+    }
+
+    function setJson(value) {
+      jsonBox.value = JSON.stringify(value, null, 2);
+      showResult('Payload updated.');
+    }
+
+    async function loadTemplates() {
+      const res = await api('/api/builder/templates');
+      if (Array.isArray(res.body)) {
+        const options = res.body.map(id => `<option value="${id}">${id}</option>`).join('');
+        tpl.innerHTML = `<option value="">-- select template --</option>` + options;
+      } else {
+        tpl.innerHTML = '<option value="">(no templates)</option>';
+      }
+    }
+
+    document.getElementById('btn-load').onclick = () => {
+      const id = tpl.value || '';
+      if (!id) {
+        showResult('Pick a template first.');
+        return;
+      }
+      setJson({ formSpec: { id } });
+    };
+
+    document.getElementById('btn-demo').onclick = () => {
+      setJson({ envelope: { mova_version: '3.3.0', $schema: 'envelope.schema.json', steps: [] } });
+    };
+
+    document.getElementById('btn-preview').onclick = async () => {
+      try {
+        const payload = JSON.parse(jsonBox.value || '{}');
+        const res = await api('/api/builder/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        showResult(res);
+      } catch (e) {
+        showResult('JSON parse error: ' + e.message);
+      }
+    };
+
+    document.getElementById('btn-save').onclick = async () => {
+      try {
+        const payload = JSON.parse(jsonBox.value || '{}');
+        const res = await api('/api/builder/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        showResult(res);
+        if (res.status === 200 && res.body?.id) {
+          await loadTemplates();
+          tpl.value = res.body.id;
+        }
+      } catch (e) {
+        showResult('JSON parse error: ' + e.message);
+      }
+    };
+
+    loadTemplates();
+  </script>
+</body>
+</html>

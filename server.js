@@ -28,7 +28,7 @@ app.use('/api/builder', builderController);
 // TODO: Додати rate-limiting middleware для /api/run, /api/validate
 
 // Сервіруємо статичні файли фронтенду (зібраний SPA)
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 // --- Допоміжна функція для запуску скриптів ---
 const runScript = (scriptPath, args = [], options = {}) => {
