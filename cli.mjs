@@ -1,51 +1,125 @@
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { DEFAULT_LANGUAGE, isSupportedLanguage, setLanguage, t } from './src/i18n/i18n.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const [,, command, ...args] = process.argv;
+const rawArgs = process.argv.slice(2);
+const filteredArgs = [];
+let languageFromFlag;
+let langFlagProvided = false;
+
+for (let index = 0; index < rawArgs.length; index += 1) {
+    const value = rawArgs[index];
+
+    if (value === '--lang') {
+        langFlagProvided = true;
+        const nextValue = rawArgs[index + 1];
+        if (typeof nextValue === 'string' && !nextValue.startsWith('--')) {
+            languageFromFlag = nextValue;
+            index += 1;
+        } else {
+            console.warn(t('warnings.missingLanguageArgument'));
+        }
+        continue;
+    }
+
+    if (value.startsWith('--lang=')) {
+        langFlagProvided = true;
+        const potential = value.slice('--lang='.length);
+        if (potential) {
+            languageFromFlag = potential;
+        } else {
+            console.warn(t('warnings.missingLanguageArgument'));
+        }
+        continue;
+    }
+
+    filteredArgs.push(value);
+}
+
+const environmentLanguage = process.env.MOVA_LANG;
+if (langFlagProvided && environmentLanguage) {
+    console.warn(t('cli.ignoredEnvLanguage'));
+}
+
+let requestedLanguage = langFlagProvided ? languageFromFlag : environmentLanguage;
+if (typeof requestedLanguage === 'string') {
+    requestedLanguage = requestedLanguage.trim().toLowerCase();
+}
+
+if (requestedLanguage && !isSupportedLanguage(requestedLanguage)) {
+    console.warn(t('warnings.unsupportedLanguage', { requested: requestedLanguage }));
+    requestedLanguage = DEFAULT_LANGUAGE;
+}
+
+setLanguage(requestedLanguage ?? DEFAULT_LANGUAGE);
+
+const [command, ...args] = filteredArgs;
 
 const scripts = {
     'parse': {
         path: 'scripts/language/parse_vnl.mjs',
-        description: 'Парсить речення VNL і генерує український план.\n  Приклад: parse "send message to general"'
+        descriptionKey: 'commands.parse.description',
+        exampleKey: 'commands.parse.example'
     },
     'run': {
         path: 'scripts/runtime/run_plan.mjs',
-        description: 'Виконує канонічний (англійський) план.\n  Приклад: run canonical/plan_min.json'
+        descriptionKey: 'commands.run.description',
+        exampleKey: 'commands.run.example'
     },
     'build': {
         npm: 'build:ua',
-        description: 'Збирає та валідує українські шаблони, створюючи канонічні файли.'
+        descriptionKey: 'commands.build.description',
+        exampleKey: 'commands.build.example'
     },
     'translate:reverse': {
         npm: 'translate:en-ua',
-        description: 'Перекладає всі канонічні файли з /canonical на українську в /templates/ua/from-en.'
+        descriptionKey: 'commands.translateReverse.description',
+        exampleKey: 'commands.translateReverse.example'
     },
     'fingerprint': {
         npm: 'build:fingerprint',
-        description: 'Генерує "відбиток" (хеші) для всіх схем у build/schema_fingerprint.json.'
+        descriptionKey: 'commands.fingerprint.description',
+        exampleKey: 'commands.fingerprint.example'
     },
     'help': {
-        description: 'Показує цю довідку.'
+        descriptionKey: 'commands.help.description'
     }
 };
 
+const longestCommandLength = Object.keys(scripts)
+    .reduce((max, name) => Math.max(max, name.length), 0);
+
 function printHelp() {
-    console.log('--- Інтерфейс командного рядка MOVA ---');
-    console.log('\nВикористання: npm run cli -- <команда> [аргументи]\n');
-    console.log('Доступні команди:\n');
-    for (const cmd in scripts) {
-        // Pad the command name for alignment
-        const paddedCmd = cmd.padEnd(20, ' ');
-        console.log(`  ${paddedCmd} ${scripts[cmd].description}`);
+    console.log(t('cli.header'));
+    console.log('');
+    console.log(t('cli.usage'));
+    console.log('');
+    console.log(t('cli.availableCommands'));
+    console.log('');
+
+    for (const cmd of Object.keys(scripts)) {
+        const config = scripts[cmd];
+        const description = t(config.descriptionKey);
+        const paddedCmd = cmd.padEnd(longestCommandLength + 2, ' ');
+        console.log(t('cli.commandItem', { command: paddedCmd, description }));
+
+        if (config.exampleKey) {
+            const example = t(config.exampleKey);
+            if (example !== config.exampleKey) {
+                console.log(t('cli.example', { example }));
+            }
+        }
     }
-    console.log('\n----------------------------------------');
+
+    console.log('');
+    console.log(t('cli.footer'));
 }
 
-if (!command || command === 'help') {
+if (!command || command === 'help' || command === '--help' || command === '-h') {
     printHelp();
     process.exit(0);
 }
@@ -53,55 +127,52 @@ if (!command || command === 'help') {
 const scriptConfig = scripts[command];
 
 if (!scriptConfig) {
-    console.error(`❌ Невідома команда: "${command}"`);
+    console.error('❌ ' + t('errors.unknownCommand', { command }));
     printHelp();
     process.exit(1);
 }
 
-// Function to run a node script
 function runNodeScript(scriptPath, scriptArgs) {
     const fullPath = resolve(__dirname, scriptPath);
-    // For VNL parser, we need to join args back into a sentence
     const finalArgs = scriptPath.includes('parse_vnl') ? [scriptArgs.join(' ')] : scriptArgs;
 
     const child = spawn('node', [fullPath, ...finalArgs], { stdio: 'inherit' });
 
     child.on('close', (code) => {
         if (code !== 0) {
-            console.error(`\n💥 Скрипт завершився з кодом помилки: ${code}`);
+            console.error('');
+            console.error('💥 ' + t('errors.scriptFailed', { code }));
         }
         process.exit(code);
     });
 
     child.on('error', (err) => {
-        console.error(`💥 Помилка запуску скрипта ${scriptPath}:`, err);
+        console.error('💥 ' + t('errors.scriptSpawn', { script: scriptPath }));
+        console.error(err);
         process.exit(1);
     });
 }
 
-// Function to run an npm script
 function runNpmScript(scriptName) {
-    // 'shell: true' is important for cross-platform compatibility, especially on Windows
     const child = spawn('npm', ['run', scriptName], { stdio: 'inherit', shell: true });
 
     child.on('close', (code) => {
         if (code !== 0) {
-            console.error(`\n💥 npm-скрипт завершився з кодом помилки: ${code}`);
+            console.error('');
+            console.error('💥 ' + t('errors.npmScriptFailed', { code }));
         }
         process.exit(code);
     });
 
     child.on('error', (err) => {
-        console.error(`💥 Помилка запуску npm-скрипта ${scriptName}:`, err);
+        console.error('💥 ' + t('errors.npmScriptSpawn', { script: scriptName }));
+        console.error(err);
         process.exit(1);
     });
 }
 
-
 if (scriptConfig.path) {
-    // It's a direct node script
     runNodeScript(scriptConfig.path, args);
 } else if (scriptConfig.npm) {
-    // It's an npm script
     runNpmScript(scriptConfig.npm);
 }

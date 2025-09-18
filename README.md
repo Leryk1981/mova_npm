@@ -12,6 +12,12 @@
 - Людині — рідна мова і прозорі смисли.
 - Машині — стабільні англомовні контракти, інструменти, CI.
 
+## Language & i18n policy
+- The MOVA CLI speaks canonical English by default for all user-facing hints.
+- Select a locale with `--lang <code>` or the `MOVA_LANG` environment variable (`--lang` wins when both are set).
+- Only `en` is currently available; unsupported language codes emit a warning and fall back to English.
+- Schemas, identifiers, keys, and parameter names stay in English. Additional locales are introduced on demand when high-quality translations are ready.
+
 ## Стандарти
 - JSON Schema 2020-12 — структурна валідація.
 - OpenAPI 3.1 — опис HTTP інтерфейсів (у CI).
