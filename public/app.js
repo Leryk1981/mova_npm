@@ -1,5 +1,8 @@
 const { useState, useEffect, useMemo, useCallback } = React;
 
+const API_BASE = (window.__MOVA_API_BASE__ || '').replace(/\/$/, '');
+const apiPath = (path) => `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+
 function App() {
     const [templates, setTemplates] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,8 +19,7 @@ function App() {
     });
 
     useEffect(() => {
-        // Сервер запущено на порту 3001
-        fetch('http://localhost:3001/api/templates')
+        fetch(apiPath('/api/templates'))
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Помилка мережі. Перевірте, чи запущено сервер.');
@@ -36,7 +38,7 @@ function App() {
 
     const handleSelectTemplate = async (templateId) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/templates/${templateId}`);
+            const response = await fetch(apiPath(`/api/templates/${templateId}`));
             if (!response.ok) {
                 throw new Error('Не вдалося завантажити шаблон');
             }
@@ -57,7 +59,7 @@ function App() {
 
     const handleShowSecrets = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/secrets');
+            const response = await fetch(apiPath('/api/secrets'));
             if (!response.ok) throw new Error('Не вдалося завантажити секрети');
             const data = await response.json();
             setSecrets(data);
@@ -69,7 +71,7 @@ function App() {
 
     const handleAddSecret = async (alias) => {
         try {
-            const response = await fetch('http://localhost:3001/api/secrets', {
+            const response = await fetch(apiPath('/api/secrets'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ alias })
@@ -475,7 +477,7 @@ function FormWizard({ formDef, onBack }) {
 
         setLoading(true);
         try {
-            const buildResponse = await fetch('http://localhost:3001/api/build-canonical', {
+            const buildResponse = await fetch(apiPath('/api/build-canonical'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -493,7 +495,7 @@ function FormWizard({ formDef, onBack }) {
             const canonicalJson = buildPayload.canonical;
             const buildLogs = buildPayload.logs || { stdout: '', stderr: '' };
 
-            const validateResponse = await fetch('http://localhost:3001/api/validate', {
+            const validateResponse = await fetch(apiPath('/api/validate'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ canonicalJson })
@@ -506,7 +508,7 @@ function FormWizard({ formDef, onBack }) {
 
             let secretsStatus = [];
             try {
-                const secretsResponse = await fetch('http://localhost:3001/api/secrets');
+                const secretsResponse = await fetch(apiPath('/api/secrets'));
                 const available = secretsResponse.ok ? await secretsResponse.json() : [];
                 secretsStatus = secretFields.map(field => {
                     const alias = formData[field.key] ?? field.sample ?? field.default ?? '';
@@ -549,7 +551,7 @@ function FormWizard({ formDef, onBack }) {
         if (!result?.canonicalJson) return;
         setLoading(true);
         try {
-            const runResponse = await fetch('http://localhost:3001/api/run', {
+            const runResponse = await fetch(apiPath('/api/run'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ canonicalJson: result.canonicalJson, dryRun: true })
