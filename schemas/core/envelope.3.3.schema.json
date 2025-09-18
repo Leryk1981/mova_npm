@@ -20,13 +20,25 @@
       "default": "application/json"
     },
     "payload": {
-      "type": [
-        "object",
-        "array",
-        "string",
-        "number",
-        "boolean",
-        "null"
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "array"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "description": {
@@ -187,4 +199,3 @@
     }
   ]
 }
-

@@ -1,23 +1,36 @@
 import fs from 'fs';
 import path from 'path';
 import { createAjv } from '../lib/createAjv.mjs';
+import { normalizeAjvErrors, validationError } from '../error_wrap.mjs';
 
 const ajv = createAjv();
 
 const schemaPath = path.resolve('schemas/form_spec.schema.json');
 const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-const validate = ajv.compile(schema);
+let validate;
+try {
+  validate = ajv.compile(schema);
+} catch (error) {
+  const wrapped = validationError('Validation failed', normalizeAjvErrors(error?.errors || [error]));
+  console.error(JSON.stringify(wrapped.body, null, 2));
+  process.exit(1);
+}
+
+function emitValidationError(filePath, errors) {
+  const wrapped = validationError('Validation failed', normalizeAjvErrors(errors));
+  console.error(`Validation failed for ${filePath}:`);
+  console.error(JSON.stringify(wrapped.body, null, 2));
+}
 
 function validateFormSpec(filePath) {
   try {
     const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     const valid = validate(data);
     if (!valid) {
-      console.error(`Validation failed for ${filePath}:`);
-      console.error(validate.errors);
+      emitValidationError(filePath, validate.errors);
       return false;
     }
-    console.log(`✓ ${filePath} is valid`);
+    console.log(`? ${filePath} is valid`);
     return true;
   } catch (err) {
     console.error(`Error reading or parsing ${filePath}:`, err.message);

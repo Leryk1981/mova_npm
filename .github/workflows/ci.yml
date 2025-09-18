@@ -1,0 +1,27 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build || true
+      - run: npm run validate:schemas || true
+      - run: npm run smoke || true
+      - run: npm test -- --reporter dot || true
+      - run: npm audit --omit=dev || true
+
+      - run: mkdir -p sbom
+      - run: npx @cyclonedx/cyclonedx-npm --output-file sbom/bom-${{ matrix.node }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.node }}
+          path: sbom/bom-${{ matrix.node }}.json

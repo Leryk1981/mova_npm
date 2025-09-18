@@ -3,6 +3,7 @@ import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 // Використовуємо спільну фабрику Ajv для JSON Schema 2020-12
 import { createAjv } from '../lib/createAjv.mjs';
+import { normalizeAjvErrors, validationError } from '../error_wrap.mjs';
 
 // --- Налаштування ---
 const __filename = fileURLToPath(import.meta.url);
@@ -65,7 +66,7 @@ for (const schemaPath of schemaFilePaths) {
 }
 
 // Створюємо екземпляр Ajv через спільну фабрику (draft 2020-12).
-const ajv = createAjv({ validateSchema: false });
+const ajv = createAjv({ validateSchema: false, strict: false, allowUnionTypes: true, strictRequired: false });
 // Потім додаємо всі наші схеми. Це також їх скомпілює.
 ajv.addSchema(allSchemas);
 
@@ -93,7 +94,8 @@ function validateFile(dataPath, schemaPath) {
       console.log(`✅ ${dataPath} відповідає схемі ${schemaPath}.`);
     } else {
       console.error(`❌ ${dataPath} НЕ відповідає схемі ${schemaPath}:`);
-      console.error(JSON.stringify(validate.errors, null, 2));
+      const wrapped = validationError('Validation failed', normalizeAjvErrors(validate.errors));
+      console.error(JSON.stringify(wrapped.body, null, 2));
       hasErrors = true;
     }
   } catch (error) {

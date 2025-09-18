@@ -2,9 +2,13 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
 const DEFAULT_OPTIONS = {
-  allErrors: true,
-  strict: false,
-  discriminator: true,
+  strict: true,
+  allErrors: false,
+  allowUnionTypes: false,
+  removeAdditional: false,
+  validateFormats: true,
+  unevaluated: true,
+  discriminator: true
 };
 
 export function createAjv(options = {}) {

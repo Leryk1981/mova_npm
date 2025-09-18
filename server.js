@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import os from 'os';
 import { spawn } from 'child_process';
+import { validationError } from './scripts/error_wrap.mjs';
 
 // Оскільки ми використовуємо ES Modules, __dirname не доступний.
 // Це стандартний спосіб отримати шлях до поточної директорії.
@@ -58,6 +59,45 @@ const runScript = (scriptPath, args = [], options = {}) => {
         });
     });
 };
+
+function extractValidationBody(stderr = '') {
+    if (!stderr) {
+        return null;
+    }
+    const lines = stderr.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    for (let i = lines.length - 1; i >= 0; i--) {
+        const line = lines[i];
+        try {
+            const parsed = JSON.parse(line);
+            if (parsed && parsed.error && parsed.error.code === 'VALIDATION_FAILED') {
+                return parsed;
+            }
+        } catch (ignore) {
+            // not JSON
+        }
+    }
+    return null;
+}
+
+function sendValidationError(res, stderr, fallbackDetail, { force = false } = {}) {
+    const parsed = extractValidationBody(stderr);
+    if (parsed) {
+        res.status(422).json(parsed);
+        return true;
+    }
+    if (!force) {
+        return false;
+    }
+    let detailEntry = fallbackDetail;
+    if (typeof detailEntry === 'string' || detailEntry === undefined) {
+        const message = detailEntry && detailEntry.trim().length ? detailEntry : 'Validation failed';
+        detailEntry = { message };
+    }
+    const details = Array.isArray(detailEntry) ? detailEntry : [detailEntry];
+    const { body } = validationError('Validation failed', details);
+    res.status(422).json(body);
+    return true;
+}
 
 // --- API Endpoints згідно з tz_ui.md ---
 
@@ -159,6 +199,9 @@ app.post('/api/build-canonical', async (req, res) => {
 
     } catch (error) {
         console.error('Помилка під час build canonical:', error.stderr || error.message);
+        if (sendValidationError(res, error.stderr)) {
+            return;
+        }
         res.status(500).json({ message: 'Не вдалося збудувати canonical.', error: error.stderr || error.message });
     } finally {
         if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
@@ -218,7 +261,7 @@ app.post('/api/validate', async (req, res) => {
         res.json({ valid: true, report: 'JSON валідний згідно зі схемами.' });
     } catch (error) {
         console.error('Помилка валідації:', error.stderr || error.message);
-        res.status(400).json({ valid: false, report: error.stderr || 'Не вдалося виконати валідацію.' });
+        sendValidationError(res, error.stderr, error.stderr || error.message, { force: true });
     } finally {
         if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
     }
@@ -246,6 +289,9 @@ app.post('/api/run', async (req, res) => {
         res.json({ success: true, output: stdout, warnings: stderr });
     } catch (error) {
         console.error('Помилка виконання плану:', error.stderr || error.message);
+        if (sendValidationError(res, error.stderr)) {
+            return;
+        }
         res.status(500).json({ success: false, error: error.stderr || 'Не вдалося виконати план.' });
     } finally {
         if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });

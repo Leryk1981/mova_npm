@@ -1,6 +1,6 @@
 {
   "name": "mova",
-  "version": "0.1.0",
+  "version": "0.9.0-rc.1",
   "description": "No-Code Automation Platform for MOVA",
   "type": "module",
   "scripts": {
@@ -9,12 +9,20 @@
     "forms:build:dev": "node scripts/forms/build_canonical.mjs templates/forms --mode=dev --fill-sample",
     "forms:build:prod": "node scripts/forms/build_canonical.mjs templates/forms --mode=prod",
     "validate:canonical": "node scripts/validation/validate_canonical.mjs",
+    "validate:schemas": "node scripts/validation/validate_schemas.mjs",
     "smoke": "node scripts/run/smoke.mjs templates/canonical",
     "build:all": "npm run forms:lint && npm run forms:build:dev && npm run validate:canonical && npm run smoke",
+    "build": "npm run build:all",
     "release:check": "npm run forms:lint && npm run forms:build:prod && npm run validate:canonical && npm run smoke",
     "start:ui": "node server.js",
     "run": "node scripts/runtime/run_plan.mjs",
-    "cli": "node cli.mjs"
+    "cli": "node cli.mjs",
+    "bench": "node bench/bench.mjs",
+    "sbom": "npx @cyclonedx/cyclonedx-npm --output-file sbom/bom.json",
+    "test": "npm run validate:schemas"
+  },
+  "engines": {
+    "node": ">=18.20 <=22.x"
   },
   "author": "",
   "license": "MIT",
