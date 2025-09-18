@@ -17,6 +17,20 @@ const port = Number(process.env.PORT || 3000);
 // Директорія з визначеннями форм для UI, як описано в ТЗ (tz_ui.md)
 const FORM_DEFS_DIR = path.join(__dirname, 'form_definitions');
 
+const SUPPORTED_MOVA_VERSIONS = new Set(['3.3.0']);
+
+function isPlainObject(value) {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function sendError(res, status, code, message, meta = undefined) {
+    const payload = { error: { code, message } };
+    if (meta && Object.keys(meta).length > 0) {
+        payload.error.meta = meta;
+    }
+    res.status(status).json(payload);
+}
+
 // --- Middleware ---
 app.use(cors()); // Дозволяємо крос-доменні запити
 app.use(express.json());
@@ -164,6 +178,50 @@ app.post('/api/build-canonical', async (req, res) => {
     } finally {
         if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
     }
+});
+
+app.post('/api/builder/preview', (req, res) => {
+    const { envelope, formSpec } = req.body ?? {};
+
+    if (envelope) {
+        if (!isPlainObject(envelope)) {
+            return sendError(res, 422, 'ENVELOPE_INVALID', 'envelope must be an object.');
+        }
+
+        const version = typeof envelope.mova_version === 'string' ? envelope.mova_version.trim() : '';
+        if (!version) {
+            return sendError(res, 422, 'ENVELOPE_INVALID', 'envelope.mova_version must be a non-empty string.');
+        }
+
+        if (!SUPPORTED_MOVA_VERSIONS.has(version)) {
+            return sendError(
+                res,
+                422,
+                'ENVELOPE_VERSION_UNSUPPORTED',
+                `Unsupported mova_version '${version}'.`,
+                { supported: Array.from(SUPPORTED_MOVA_VERSIONS) }
+            );
+        }
+
+        const canonical = JSON.parse(JSON.stringify(envelope));
+        return res.json({ ok: true, canonical, warnings: [] });
+    }
+
+    if (formSpec) {
+        if (!isPlainObject(formSpec) || typeof formSpec.id !== 'string' || !formSpec.id.trim()) {
+            return sendError(res, 422, 'FORMSPEC_INVALID', 'formSpec.id must be a non-empty string.');
+        }
+
+        return sendError(
+            res,
+            422,
+            'PREVIEW_UNAVAILABLE',
+            'Preview generation from formSpec is not yet implemented.',
+            { id: formSpec.id }
+        );
+    }
+
+    return sendError(res, 400, 'PREVIEW_INPUT_REQUIRED', 'Provide either an envelope or formSpec to preview.');
 });
 
 // POST /api/translate — переклад UA-JSON в canonical
