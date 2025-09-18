@@ -18,7 +18,8 @@
     "run": "node scripts/runtime/run_plan.mjs",
     "cli": "node cli.mjs",
     "dev:server": "node server.js",
-    "smoke:preview": "node scripts/tests/run_builder_preview_smoke.mjs"
+    "smoke:preview": "node scripts/tests/run_builder_preview_smoke.mjs",
+    "smoke:save": "node scripts/tests/run_builder_save_smoke.mjs"
   },
   "author": "",
   "license": "MIT",

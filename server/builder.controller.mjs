@@ -1,5 +1,6 @@
 import Ajv from 'ajv/dist/2020.js';
 import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 import express from 'express';
 
@@ -59,11 +60,11 @@ async function buildCanonicalFromForm(formSpec) {
   throw new Error('FORM_BUILD_NOT_IMPLEMENTED');
 }
 
-function send422(res, details) {
+function send422(res, details, code = 'VALIDATION_FAILED', message = 'Envelope validation failed') {
   return res.status(422).json({
     error: {
-      code: 'VALIDATION_FAILED',
-      message: 'Envelope validation failed',
+      code,
+      message,
       details
     }
   });
@@ -193,6 +194,38 @@ router.post('/preview', async (req, res) => {
       error: { code: 'PREVIEW_INTERNAL_ERROR', message: String(e?.message || e) }
     });
   }
+});
+
+router.post('/save', async (req, res) => {
+  const formSpec = req.body?.formSpec;
+  if (!formSpec || typeof formSpec !== 'object' || Array.isArray(formSpec)) {
+    return send422(res, [{ message: 'formSpec must be an object' }], 'FORMSPEC_INVALID', 'FormSpec validation failed');
+  }
+
+  const id = formSpec.id;
+  if (typeof id !== 'string' || id.trim() === '') {
+    return send422(res, [{ message: 'formSpec.id must be a non-empty string' }], 'FORMSPEC_INVALID', 'FormSpec validation failed');
+  }
+
+  if (!/^[a-z0-9._:-]+$/.test(id)) {
+    return send422(res, [{ message: 'formSpec.id must match ^[a-z0-9._:-]+$' }], 'FORMSPEC_INVALID', 'FormSpec validation failed');
+  }
+
+  const targetDir = path.join(process.cwd(), 'templates', 'forms', id);
+  const filePath = path.join(targetDir, 'template.form.json');
+  const relativePath = path.posix.join('templates', 'forms', id, 'template.form.json');
+
+  try {
+    await fsPromises.mkdir(targetDir, { recursive: true });
+    await fsPromises.writeFile(filePath, JSON.stringify(formSpec, null, 2) + '\n', 'utf8');
+  } catch (error) {
+    console.error('Failed to save formSpec', error);
+    return res.status(500).json({
+      error: { code: 'SAVE_FAILED', message: 'Failed to save formSpec' }
+    });
+  }
+
+  return res.json({ ok: true, id, path: relativePath });
 });
 
 export default router;
