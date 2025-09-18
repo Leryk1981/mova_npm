@@ -386,4 +386,4 @@ templates/blank/de/envelope_min_blank.json:
 Після translate.mjs templates/de de →
 templates/canonical/envelope_min.canonical.json:
 
-{ "mova_version": "3.3", "actions": [ { "type": "print", "message": "Hallo MOVA!" } ] }
+{ "mova_version": "3.3.0", "actions": [ { "type": "print", "message": "Hallo MOVA!" } ] }

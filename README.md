@@ -31,6 +31,11 @@ npm run build:ua
 
 Див. `lexicon_uk.json`. Додавайте пари для нових ключів та дій.
 
+## Language & i18n policy
+
+Only mova_version 3.3.x is accepted.
+Any change in schemas/ must be logged in SCHEMA_CHANGELOG.md.
+
 ## Ліцензія
 
 MIT — див. `LICENSE`.

@@ -31,7 +31,7 @@ MOVA використовує FORM-DSL для no-code розробки. Форм
     }
   ],
   "baseCanonical": {
-    "mova_version": "3.3",
+    "mova_version": "3.3.0",
     "actions": [
       { "type": "print", "message": "" }
     ]

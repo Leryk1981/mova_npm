@@ -8,7 +8,7 @@
     "mova_version": {
       "description": "Версія формату плану",
       "type": "string",
-      "const": "3.3"
+      "pattern": "^3\\.3\\.\\d+$"
     },
     "payload_media_type": {
       "type": "string",

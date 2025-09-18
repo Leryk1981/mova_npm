@@ -1,5 +1,5 @@
 {
-  "mova_version": "3.3",
+  "mova_version": "3.3.0",
   "id": "mova.write_document.atomic",
   "description": "Atomic call for mova.write_document",
   "policies": {

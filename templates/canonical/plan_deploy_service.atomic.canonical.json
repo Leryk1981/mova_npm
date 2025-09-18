@@ -1,5 +1,5 @@
 {
-  "mova_version": "3.3",
+  "mova_version": "3.3.0",
   "id": "mova.deploy_service.atomic",
   "description": "Atomic call for mova.deploy_service",
   "policies": {
