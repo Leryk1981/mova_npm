@@ -1,0 +1,48 @@
+{
+  "cli": {
+    "header": "--- MOVA Command Line Interface ---",
+    "usage": "Usage: npm run cli -- [--lang <code>] <command> [arguments]",
+    "languageHint": "Select a locale with --lang <code> or set {{envVar}} (default: {{defaultLanguage}}). Available locales: {{languages}}.",
+    "availableCommands": "Available commands:",
+    "commandItem": "  {{command}} {{description}}",
+    "example": "    {{example}}",
+    "footer": "----------------------------------------",
+    "ignoredEnvLanguage": "Environment variable {{envVar}}={{envLanguage}} is ignored because --lang was provided."
+  },
+  "warnings": {
+    "unsupportedLanguage": "Language \"{{requested}}\" is not supported. Falling back to English.",
+    "missingLanguageArgument": "The --lang option requires a language code. Falling back to English."
+  },
+  "errors": {
+    "unknownCommand": "Unknown command \"{{command}}\". Run \"help\" to see the full list.",
+    "scriptFailed": "Script exited with error code {{code}}.",
+    "scriptSpawn": "Unable to launch script {{script}}.",
+    "npmScriptFailed": "npm script exited with error code {{code}}.",
+    "npmScriptSpawn": "Unable to launch npm script {{script}}."
+  },
+  "commands": {
+    "parse": {
+      "description": "Parse a VNL sentence and produce a Ukrainian plan.",
+      "example": "Example: parse \"send message to general\""
+    },
+    "run": {
+      "description": "Execute a canonical (English) plan file.",
+      "example": "Example: run canonical/plan_min.json"
+    },
+    "build": {
+      "description": "Build and validate Ukrainian templates to produce canonical files.",
+      "example": "Example: build"
+    },
+    "translateReverse": {
+      "description": "Translate canonical files from /canonical to Ukrainian in /templates/ua/from-en.",
+      "example": "Example: translate:reverse"
+    },
+    "fingerprint": {
+      "description": "Generate fingerprints for all schemas in build/schema_fingerprint.json.",
+      "example": "Example: fingerprint"
+    },
+    "help": {
+      "description": "Display this help message."
+    }
+  }
+}
