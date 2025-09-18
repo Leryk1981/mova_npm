@@ -14,9 +14,15 @@
     "build:all": "npm run forms:lint && npm run forms:build:dev && npm run validate:canonical && npm run smoke",
     "release:check": "npm run forms:lint && npm run forms:build:prod && npm run validate:canonical && npm run smoke",
     "lint:cli-i18n": "node scripts/lint/check_cli_i18n.mjs",
-    "start:ui": "node server.js",
     "run": "node scripts/runtime/run_plan.mjs",
-    "cli": "node cli.mjs"
+    "cli": "node cli.mjs",
+    "smoke:preview": "node scripts/tests/run_builder_preview_smoke.mjs",
+    "smoke:save": "node scripts/tests/run_builder_save_smoke.mjs",
+    "smoke:market": "node scripts/tests/run_market_install_smoke.mjs",
+    "smoke:proxy": "node scripts/tests/run_proxy_echo_smoke.mjs",
+    "mp:build": "node scripts/marketplace/build_package.mjs",
+    "mp:index": "node scripts/marketplace/index_rebuild.mjs",
+    "dev:server": "node server.js"
   },
   "author": "",
   "license": "MIT",
@@ -27,6 +33,7 @@
     "express": "^4.21.2"
   },
   "devDependencies": {
-    "serve": "^14.2.5"
+    "serve": "^14.2.5",
+    "adm-zip": "^0.5.16"
   }
 }

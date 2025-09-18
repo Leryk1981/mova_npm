@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const port = Number(process.env.PORT || 3000);
 
 // Директорія з визначеннями форм для UI, як описано в ТЗ (tz_ui.md)
 const FORM_DEFS_DIR = path.join(__dirname, 'form_definitions');
@@ -26,6 +26,7 @@ app.use(express.json());
 
 // Сервіруємо статичні файли фронтенду (зібраний SPA)
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/health', (_req, res) => res.json({ ok: true }));
 
 // --- Допоміжна функція для запуску скриптів ---
 const runScript = (scriptPath, args = [], options = {}) => {
@@ -281,6 +282,12 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Сервер MOVA UI Gateway запущено на http://localhost:${PORT}`);
-});
+const httpServer = app.listen(port, () => console.log(`Server on :${port}`));
+
+function shutdown() {
+  console.log('Shutting down...');
+  httpServer.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 2000).unref();
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
