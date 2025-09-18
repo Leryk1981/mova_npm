@@ -12,6 +12,7 @@
     "smoke": "node scripts/run/smoke.mjs templates/canonical",
     "build:all": "npm run forms:lint && npm run forms:build:dev && npm run validate:canonical && npm run smoke",
     "release:check": "npm run forms:lint && npm run forms:build:prod && npm run validate:canonical && npm run smoke",
+    "lint:cli-i18n": "node scripts/lint/check_cli_i18n.mjs",
     "start:ui": "node server.js",
     "run": "node scripts/runtime/run_plan.mjs",
     "cli": "node cli.mjs"
