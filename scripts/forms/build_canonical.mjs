@@ -137,8 +137,20 @@ function collectFields(formSpec) {
   }
   return map;
 }
+function cloneDeep(value) {
+  if (typeof structuredClone === 'function') {
+    try {
+      return structuredClone(value);
+    } catch (err) {
+      // fall through
+    }
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
 function buildCanonical(formSpec, formValues, options) {
-  const canonical = JSON.parse(JSON.stringify(formSpec.baseCanonical));
+  const baseCanonical = formSpec.baseCanonical ?? {};
+  const canonical = cloneDeep(baseCanonical);
   const fields = collectFields(formSpec);
   const totalBinds = Array.isArray(formSpec.bind) ? formSpec.bind.length : 0;
 
@@ -151,6 +163,18 @@ function buildCanonical(formSpec, formValues, options) {
   };
   const warnings = [];
   const errors = [];
+
+  if (!formSpec.baseCanonical || typeof formSpec.baseCanonical !== 'object') {
+    errors.push('Form spec is missing baseCanonical skeleton');
+  }
+
+  if (!Array.isArray(formSpec.bind) || formSpec.bind.length === 0) {
+    errors.push('Form spec has no bind rules defined');
+  }
+
+  if (errors.length) {
+    return { canonical, stats, warnings, errors };
+  }
 
   for (const binding of formSpec.bind) {
     const { from, to, transform, transformArgs } = binding;

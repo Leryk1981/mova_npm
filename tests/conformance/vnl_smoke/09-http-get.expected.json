@@ -1,0 +1,13 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://api.example.com/status",
+        "method": "GET"
+      }
+    }
+  ]
+}

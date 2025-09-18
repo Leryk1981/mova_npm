@@ -1,0 +1,23 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://api.stripe.com/v1/payment_intents",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer {env.STRIPE_SECRET}",
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "body": {
+          "amount": "1999",
+          "currency": "usd",
+          "description": "Pro план"
+        },
+        "result_in": "vars.stripe"
+      }
+    }
+  ]
+}

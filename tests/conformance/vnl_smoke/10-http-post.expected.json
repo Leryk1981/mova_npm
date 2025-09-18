@@ -1,0 +1,17 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://api.example.com/notify",
+        "method": "POST",
+        "body": "{\\\"event\\\":\\\"deploy\\\"}",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  ]
+}

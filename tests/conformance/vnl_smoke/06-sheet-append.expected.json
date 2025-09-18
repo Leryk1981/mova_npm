@@ -1,0 +1,25 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/marketing/values/A:A:append?valueInputOption=USER_ENTERED",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer {env.GOOGLE_SHEETS_TOKEN}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "values": [
+            [
+              "банер",
+              "активний"
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

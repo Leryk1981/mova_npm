@@ -1,0 +1,26 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer {env.GOOGLE_CALENDAR_TOKEN}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "summary": "Демо з клієнтом",
+          "start": {
+            "dateTime": "2025-06-01T10:00:00Z"
+          },
+          "end": {
+            "dateTime": "2025-06-01T10:00:00Z"
+          }
+        }
+      }
+    }
+  ]
+}

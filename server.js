@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs/promises';
-import os from 'os';
-import { spawn } from 'child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import { spawn } from 'node:child_process';
+
+import { validationError } from './scripts/error_wrap.mjs';
 
 // Оскільки ми використовуємо ES Modules, __dirname не доступний.
 // Це стандартний спосіб отримати шлях до поточної директорії.
@@ -58,6 +60,95 @@ const runScript = (scriptPath, args = [], options = {}) => {
         });
     });
 };
+
+
+async function loadTemplateById(id) {
+    if (!id) {
+        throw new Error('Form template id is required');
+    }
+    const templatePath = path.join(process.cwd(), 'templates', 'forms', id, 'template.form.json');
+    const raw = await fs.readFile(templatePath, 'utf8');
+    return JSON.parse(raw);
+}
+
+function extractValidationBody(stderr = '') {
+    if (!stderr) {
+        return null;
+    }
+    const lines = stderr.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    for (let i = lines.length - 1; i >= 0; i -= 1) {
+        const line = lines[i];
+        try {
+            const parsed = JSON.parse(line);
+            if (parsed && parsed.error && parsed.error.code === 'VALIDATION_FAILED') {
+                return parsed;
+            }
+        } catch {
+            // ignore non-JSON lines
+        }
+    }
+    return null;
+}
+
+function sendValidationError(res, stderr, fallbackDetail, { force = false } = {}) {
+    const parsed = extractValidationBody(stderr);
+    if (parsed) {
+        res.status(422).json(parsed);
+        return true;
+    }
+    if (!force) {
+        return false;
+    }
+    let detailEntry = fallbackDetail;
+    if (typeof detailEntry === 'string' || detailEntry === undefined) {
+        const message = detailEntry && detailEntry.trim().length ? detailEntry : 'Validation failed';
+        detailEntry = { message };
+    }
+    const details = Array.isArray(detailEntry) ? detailEntry : [detailEntry];
+    const { body } = validationError('Validation failed', details);
+    res.status(422).json(body);
+    return true;
+}
+
+function deriveEffectiveValues(formSpec, explicitValues = {}) {
+    const result = {
+        ...(formSpec.form || {}),
+        ...(formSpec.overrides || {}),
+        ...(explicitValues || {})
+    };
+    for (const section of formSpec.sections || []) {
+        for (const field of section.fields || []) {
+            const current = result[field.key];
+            if (current !== undefined && current !== null && String(current).trim().length) {
+                continue;
+            }
+            if (Object.prototype.hasOwnProperty.call(field, 'default')) {
+                result[field.key] = field.default;
+                continue;
+            }
+            if (Object.prototype.hasOwnProperty.call(field, 'sample')) {
+                result[field.key] = field.sample;
+                continue;
+            }
+            if (field.type === 'secret-alias') {
+                result[field.key] = `DEMO_${field.key}`;
+                continue;
+            }
+            if (field.type === 'textarea') {
+                result[field.key] = `demo ${field.key.toLowerCase()} content`;
+                continue;
+            }
+            if (field.type === 'text') {
+                result[field.key] = `demo-${field.key.toLowerCase()}`;
+                continue;
+            }
+            result[field.key] = `demo-${field.key}`;
+        }
+    }
+    return result;
+}
+
+
 
 // --- API Endpoints згідно з tz_ui.md ---
 
@@ -119,10 +210,59 @@ app.get('/api/templates/:id', async (req, res) => {
 
 // POST /api/build-canonical — збірка canonical з formSpec та formData
 app.post('/api/build-canonical', async (req, res) => {
-    const { formSpec, formValues, mode = 'dev', fillSample = false } = req.body;
-    if (!formSpec || !formValues) {
-        return res.status(400).json({ message: 'Необхідно надати formSpec та formValues.' });
+    const payload = req.body ?? {};
+    const incomingSpec = payload.formSpec;
+    const explicitValues = payload.formValues;
+    const mode = payload.mode ?? 'dev';
+    const requestedFillSample = payload.fillSample;
+
+    if (!incomingSpec) {
+        const err = validationError('Validation failed', [
+            { path: '/formSpec', message: 'formSpec is required' }
+        ]);
+        return res.status(err.status).json(err.body);
     }
+
+    let formSpec = incomingSpec;
+
+    try {
+        if (!formSpec.baseCanonical || !formSpec.bind) {
+            if (!formSpec.id) {
+                const err = validationError('Validation failed', [
+                    { path: '/formSpec/id', message: 'Missing formSpec.id to load template' }
+                ]);
+                return res.status(err.status).json(err.body);
+            }
+
+            const template = await loadTemplateById(formSpec.id);
+
+            formSpec = {
+                ...template,
+                ...formSpec,
+                baseCanonical: formSpec.baseCanonical ?? template.baseCanonical,
+                bind: formSpec.bind ?? template.bind,
+                sections: formSpec.sections ?? template.sections,
+                i18n: formSpec.i18n ?? template.i18n,
+                form: formSpec.form ?? template.form,
+                overrides: formSpec.overrides ?? template.overrides
+            };
+        }
+    } catch (error) {
+        const err = validationError('Validation failed', [
+            {
+                path: '/formSpec/id',
+                message: error.code === 'ENOENT'
+                    ? `Template not found for id "${incomingSpec.id}"`
+                    : error.message
+            }
+        ]);
+        return res.status(err.status).json(err.body);
+    }
+
+    const effectiveValues = deriveEffectiveValues(formSpec, explicitValues);
+    const hasExplicitValues = explicitValues && Object.keys(explicitValues || {}).length > 0;
+    const fillSample = requestedFillSample === undefined ? !hasExplicitValues : Boolean(requestedFillSample);
+    const shouldPassValues = Object.keys(effectiveValues).length > 0;
 
     let tempDir;
     try {
@@ -131,18 +271,25 @@ app.post('/api/build-canonical', async (req, res) => {
         const valuesFile = path.join(tempDir, 'values.json');
         const outDir = path.join(tempDir, 'canonical');
 
-        await fs.writeFile(formFile, JSON.stringify(formSpec, null, 2), 'utf-8');
-        await fs.writeFile(valuesFile, JSON.stringify(formValues, null, 2), 'utf-8');
+        const specForBuild = { ...formSpec };
+        delete specForBuild.form;
+        delete specForBuild.overrides;
+
+        await fs.writeFile(formFile, JSON.stringify(specForBuild, null, 2), 'utf-8');
+        if (shouldPassValues) {
+            await fs.writeFile(valuesFile, JSON.stringify(effectiveValues, null, 2), 'utf-8');
+        }
 
         const args = [
             formFile,
-            '--values',
-            valuesFile,
             '--mode',
             mode === 'prod' ? 'prod' : 'dev',
             '--out-dir',
             outDir
         ];
+        if (shouldPassValues) {
+            args.splice(1, 0, '--values', valuesFile);
+        }
         if (fillSample) {
             args.push('--fill-sample');
         }
@@ -155,15 +302,19 @@ app.post('/api/build-canonical', async (req, res) => {
 
         const outputFile = path.join(outDir, `${formSpec.id}.canonical.json`);
         const canonicalJson = JSON.parse(await fs.readFile(outputFile, 'utf-8'));
-        res.json({ canonical: canonicalJson, logs: { stdout, stderr } });
+        res.json({ canonical: canonicalJson, values: effectiveValues, logs: { stdout, stderr } });
 
     } catch (error) {
-        console.error('Помилка під час build canonical:', error.stderr || error.message);
-        res.status(500).json({ message: 'Не вдалося збудувати canonical.', error: error.stderr || error.message });
+        console.error('Build canonical failed:', error.stderr || error.message);
+        if (sendValidationError(res, error.stderr)) {
+            return;
+        }
+        res.status(500).json({ message: 'Failed to build canonical.', error: error.stderr || error.message });
     } finally {
         if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
     }
 });
+
 
 // POST /api/translate — переклад UA-JSON в canonical
 app.post('/api/translate', async (req, res) => {

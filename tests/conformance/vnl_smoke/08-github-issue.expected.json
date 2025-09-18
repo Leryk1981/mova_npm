@@ -1,0 +1,22 @@
+{
+  "mova_version": "3.3",
+  "actions": [
+    {
+      "type": "http_request",
+      "invoke": "http:request",
+      "payload": {
+        "url": "https://api.github.com/repos/mova/issues",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer {env.GITHUB_TOKEN}",
+          "Content-Type": "application/json",
+          "User-Agent": "mova-automation"
+        },
+        "body": {
+          "title": "Bug у перекладі",
+          "body": "Слово \"workflow\" не перекладено"
+        }
+      }
+    }
+  ]
+}
