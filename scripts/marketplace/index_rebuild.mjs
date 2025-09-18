@@ -16,15 +16,19 @@ async function ensureDir(dir) {
   await fs.mkdir(dir, { recursive: true });
 }
 
+const PACKAGE_NAME_RE = /^(?<id>[A-Za-z0-9._-]+)-(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)$/;
+
 function parsePackageName(fileName) {
   if (!fileName.endsWith('.zip')) {
     return null;
   }
+
   const base = fileName.slice(0, -4);
-  const match = base.match(/^(?<id>[A-Za-z0-9._-]+)-(?<version>\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?)$/);
+  const match = base.match(PACKAGE_NAME_RE);
   if (!match) {
     return null;
   }
+
   const { id, version } = match.groups;
   return { id, version };
 }
