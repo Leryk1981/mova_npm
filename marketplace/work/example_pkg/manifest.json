@@ -1,0 +1,13 @@
+{
+  "id": "example_pkg",
+  "version": "1.0.0",
+  "name": "Example package",
+  "description": "Demo marketplace package for smoke tests.",
+  "forms": [
+    {
+      "id": "my_demo",
+      "title": "Демонстраційна форма",
+      "path": "forms/my_demo/template.form.json"
+    }
+  ]
+}
